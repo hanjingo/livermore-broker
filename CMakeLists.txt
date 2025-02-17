@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24.1)
+cmake_minimum_required(VERSION 3.19.2)
 
 # Version Info
 set(LIVERMORE_BROKER_VERSION_MAJOR 0)
