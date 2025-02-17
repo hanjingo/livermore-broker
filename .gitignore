@@ -30,3 +30,21 @@
 *.exe
 *.out
 *.app
+
+# vscode
+.vscode
+
+# vs
+*.user
+
+# vim
+*.swo
+*.swp
+
+# Depend
+deps/*
+!deps/CMakeLists.txt
+
+# Directory
+build
+bin
