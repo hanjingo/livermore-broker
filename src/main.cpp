@@ -1,8 +1,11 @@
 #include <libcpp/testing/crash.hpp>
 #include <libcpp/log/log.hpp>
-#include <libcpp/io/fsize.hpp>
+#include <libcpp/io/file.hpp>
 #include <libcpp/io/filepath.hpp>
 #include <libcpp/os/signal.hpp>
+#include <libcpp/util/dll.h>
+
+#include <quote.h>
 
 #ifdef _WIN32
 bool dump_callback(const wchar_t* dump_dir,
@@ -29,22 +32,25 @@ bool dump_callback(const google_breakpad::MinidumpDescriptor& descriptor, void* 
 int main(int argc, char* argv[])
 {
     // add log
-    libcpp::logger::instance()->add_sink(libcpp::logger::create_sink("logs/.log", MB(10), 5, true));
+    libcpp::logger::instance()->add_sink(libcpp::logger::create_sink("logs/test.log", MB(10), 5, true));
     LOG_INFO("livermore-broker log init.");
 
     // add crash handler
-#ifdef _WIN32
-    libcpp::prevent_set_unhandled_exception_filter();
-#endif
+    libcpp::crash_handler::instance()->prevent_set_unhandled_exception_filter();
     libcpp::crash_handler::instance()->set_dump_callback(dump_callback);
-    libcpp::crash_handler::instance()->set_local_path(libcpp::file_path::pwd());
+    libcpp::crash_handler::instance()->set_local_path("./");
     LOG_INFO("livermore-broker carsh handler init.");
 
     // ignore signal
-    libcpp::sigcatch(SIGABRT, [](int sig){});
-    libcpp::sigcatch(SIGTERM, [](int sig){});
+    libcpp::sigcatch({SIGABRT, SIGTERM}, [](int sig){});
+    LOG_INFO("livermore-broker ignore signal init.");
+
+    // load quote library
+    livermore::quote::version();
+    livermore::quote qt;
+    qt.run();
 
     // get start
-    LOG_INFO("livermore-broker start!");
+    LOG_INFO("livermore-broker started!");
     return 0;
 }

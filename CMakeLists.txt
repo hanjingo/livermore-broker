@@ -12,8 +12,11 @@ set(PACKAGE_VERSION   "${LIVERMORE_BROKER_VERSION}-dev")
 set(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
 set(PACKAGE_BUGREPORT "https://github.com/hanjingo/livermore-broker/issues")
 
-# Cmake module path
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmakes" ${CMAKE_MODULE_PATH})
+# Build Type
+if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
+    set(CMAKE_BUILD_TYPE "Release" CACHE 
+        STRING "Build type config" FORCE)
+endif()
 
 # Output path
 if (UNIX)
@@ -23,8 +26,7 @@ if (UNIX)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE})
-endif()
-if (WIN32)
+elseif (WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS}")
 
@@ -45,26 +47,15 @@ if (NOT DEFINED CMAKE_CXX_EXTENSIONS)
     set(CMAKE_CXX_EXTENSIONS FALSE)
 endif()
 
-# Build Type
-if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
-    set(CMAKE_BUILD_TYPE "Release" CACHE 
-        STRING "Build type config" FORCE)
-endif()
-
 project(${PACKAGE_NAME} LANGUAGES CXX DESCRIPTION "The livermore-broker Project")
 
 # Options--library
 option(BUILD_SHARED "Build shared object" ON)
-option(BUILD_STATIC "Build static object" ON)
+option(BUILD_STATIC "Build static object" OFF)
 # Options--build
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_TESTS "Build test" OFF)
 option(BUILD_BENCHMARK "Build benchmark" OFF)
-# Option--3rd Project
-option(USE_BOOST "Use boost component" ON)
-option(USE_SPDLOG "Use spdlog" ON)
-# Option--service
-option(BUILD_QUOTE "Build quote service" OFF)
 
 add_subdirectory(deps)
 add_subdirectory(src)
