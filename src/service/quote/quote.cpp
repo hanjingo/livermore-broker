@@ -1,18 +1,23 @@
 #include "quote.h"
 
-namespace livermore
+void info()
 {
-
-void quote::version()
-{
-    std::cout << "quote version" << std::endl;
+    std::cout << "quote info" << std::endl;
 }
 
-void quote::run()
+void init()
+{
+    std::cout << "quote init" << std::endl;
+}
+
+void run()
 {
     std::cout << "quote run" << std::endl;
 
     while (true) { libcpp::application::msleep(5000); }
 }
 
+void exit()
+{
+    std::cout << "quote exit" << std::endl;
 }

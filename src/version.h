@@ -1,13 +1,8 @@
-#ifndef GLOBAL_H
-#define GLOBAL_H
+#ifndef VERSION_H
+#define VERSION_H
 
 #define LIVERMORE_MAJOR_VERSION 1
 #define LIVERMORE_MINOR_VERSION 0
 #define LIVERMORE_PATCH_VERSION 0
-
-namespace livermore
-{
-
-}
 
 #endif

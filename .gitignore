@@ -41,6 +41,9 @@
 *.swo
 *.swp
 
+# macos
+.DS_Store
+
 # Depend
 deps/*
 !deps/CMakeLists.txt

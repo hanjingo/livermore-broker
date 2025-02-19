@@ -3,19 +3,13 @@
 
 #include <iostream>
 #include <libcpp/util/dll.h>
-#include <libcpp/os/application.hpp>
 
-namespace livermore
-{
+C_STYLE_EXPORT void info();
 
-class quote
-{
-public:
-    DLL_EXPORT static void version();
+C_STYLE_EXPORT void init();
 
-    DLL_EXPORT void run();
-};
+C_STYLE_EXPORT void run();
 
-}
+C_STYLE_EXPORT void exit();
 
 #endif

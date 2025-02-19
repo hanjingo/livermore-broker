@@ -6,8 +6,8 @@
 #include <libcpp/util/dll.h>
 #include <libcpp/os/application.hpp>
 
-#include <global.h>
-#include <service/service.h>
+#include "version.h"
+#include "service.h"
 
 #ifdef _WIN32
 bool dump_callback(const wchar_t* dump_dir,
@@ -48,9 +48,11 @@ int main(int argc, char* argv[])
     LOG_INFO("livermore-broker ignore signal init.");
 
     // start service
+    // livermore::service::start("database");
+    // livermore::service::start("sentinel");
     livermore::service::start("quote");
     // livermore::service::start("broadcast");
-    // livermore::service::start("sentinel");
+    // livermore::service::start("manage");
 
     // get start
     LOG_INFO("livermore-broker started!");
