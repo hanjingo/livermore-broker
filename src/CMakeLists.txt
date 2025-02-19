@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.19.2)
 
 project(livermore-broker)
 
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/global.h DESTINATION ${CMAKE_SOURCE_DIR}/deps/include)
+
 add_subdirectory(service)
 
 find_package(Boost COMPONENTS 
@@ -17,6 +19,7 @@ if (NOT LIBCPP_INCLUDE_DIR)
     set(LIBCPP_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/libcpp)
 endif()
 
+include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${LIBCPP_INCLUDE_DIR})
 include_directories(${DEPS_DIR}/include/quote)
 include_directories(${DEPS_DIR}/include/breakpad)

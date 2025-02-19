@@ -4,8 +4,10 @@
 #include <libcpp/io/filepath.hpp>
 #include <libcpp/os/signal.hpp>
 #include <libcpp/util/dll.h>
+#include <libcpp/os/application.hpp>
 
-#include <quote.h>
+#include <global.h>
+#include <service/service.h>
 
 #ifdef _WIN32
 bool dump_callback(const wchar_t* dump_dir,
@@ -45,12 +47,13 @@ int main(int argc, char* argv[])
     libcpp::sigcatch({SIGABRT, SIGTERM}, [](int sig){});
     LOG_INFO("livermore-broker ignore signal init.");
 
-    // load quote library
-    livermore::quote::version();
-    livermore::quote qt;
-    qt.run();
+    // start service
+    livermore::service::start("quote");
+    // livermore::service::start("broadcast");
+    // livermore::service::start("sentinel");
 
     // get start
     LOG_INFO("livermore-broker started!");
+    // libcpp::application::wait();
     return 0;
 }

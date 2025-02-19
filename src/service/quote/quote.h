@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <libcpp/util/dll.h>
+#include <libcpp/os/application.hpp>
 
 namespace livermore
 {
