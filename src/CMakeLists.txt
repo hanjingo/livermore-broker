@@ -5,7 +5,8 @@ project(livermore-broker)
 add_subdirectory(service)
 
 find_package(Boost COMPONENTS 
-    filesystem)
+    filesystem
+    coroutine)
 
 find_package(spdlog)
 
@@ -26,9 +27,11 @@ link_directories(${DEPS_DIR}/lib)
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 add_executable(${PROJECT_NAME}  
-               main.cpp)
+               main.cpp
+               service.cpp)
 
 target_link_libraries(${PROJECT_NAME} 
+    ${CMAKE_DL_LIBS}
     ${Boost_LIBRARIES}
     breakpad_client
     spdlog::spdlog

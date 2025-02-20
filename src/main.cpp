@@ -3,7 +3,6 @@
 #include <libcpp/io/file.hpp>
 #include <libcpp/io/filepath.hpp>
 #include <libcpp/os/signal.hpp>
-#include <libcpp/util/dll.h>
 #include <libcpp/os/application.hpp>
 
 #include "version.h"
@@ -50,7 +49,10 @@ int main(int argc, char* argv[])
     // start service
     // livermore::service::start("database");
     // livermore::service::start("sentinel");
-    livermore::service::start("quote");
+    livermore::service quote{};
+    livermore::service::error err = quote.start("./libquote.so");
+    if (err != livermore::service::ok)
+        LOG_ERROR("start service fail, with error code={0}", (int)(err));
     // livermore::service::start("broadcast");
     // livermore::service::start("manage");
 

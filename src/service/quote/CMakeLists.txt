@@ -27,14 +27,16 @@ if (BUILD_SHARED)
     add_library(${QUOTE_SHARED_NAME} SHARED 
         ${CMAKE_CURRENT_SOURCE_DIR}/quote.cpp
     )
+
+    target_link_libraries(${QUOTE_SHARED_NAME} ${CMAKE_DL_LIBS})
 endif()
 
 if (BUILD_STATIC)
     add_library(${QUOTE_STATIC_NAME} STATIC 
         ${CMAKE_CURRENT_SOURCE_DIR}/quote.cpp
     )
-endif()
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/quote.h DESTINATION ${CMAKE_SOURCE_DIR}/deps/include/quote)
+    target_link_libraries(${QUOTE_STATIC_NAME} ${CMAKE_DL_LIBS})
+endif()
 
 message("service quote build success")

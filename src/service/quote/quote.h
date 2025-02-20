@@ -3,13 +3,14 @@
 
 #include <iostream>
 #include <libcpp/util/dll.h>
+#include <libcpp/os/application.hpp>
 
-C_STYLE_EXPORT void info();
+C_STYLE_EXPORT void quote_info();
 
-C_STYLE_EXPORT void init();
+C_STYLE_EXPORT void quote_init();
 
-C_STYLE_EXPORT void run();
+C_STYLE_EXPORT int quote_run();
 
-C_STYLE_EXPORT void exit();
+C_STYLE_EXPORT void quote_exit();
 
 #endif
