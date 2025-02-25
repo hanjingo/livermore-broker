@@ -3,35 +3,35 @@
 namespace livermore
 {
 
-livermore::service::error service::start(const char* file, bool async)
+livermore::error_t service::start(const char* file, bool async)
 {
     _handler = dll_open(file, DLL_RTLD_NOW);
     if (_handler == nullptr)
-        return error_dll_open_fail;
+        return dll_open_fail;
 
     _finfo = (fn_info)dll_get(_handler, "quote_info");
     if (_finfo == nullptr)
-        return service::error_fn_info_not_found;
+        return fn_info_not_found;
 
     _finit = (fn_init)dll_get(_handler, "quote_init");
     if (_finit == nullptr)
-        return service::error_fn_init_not_found;
+        return fn_init_not_found;
 
     _frun  = (fn_run)dll_get(_handler, "quote_run");
     if (_frun == nullptr)
-        return service::error_fn_run_not_found;
+        return fn_run_not_found;
 
     _fexit = (fn_exit)dll_get(_handler, "quote_exit");
     if (_fexit == nullptr)
-        return service::error_fn_exit_not_found;
+        return fn_exit_not_found;
 
     if (async)
     {
         std::thread([&](){ _frun(); }).detach();
-        return service::error::ok;
+        return ok;
     }
 
-    return (service::error)(_frun());
+    return error_t(_frun());
 }
 
 void service::stop()

@@ -2,7 +2,7 @@
 #define QUOTE_H
 
 #include <iostream>
-#include <libcpp/util/dll.h>
+#include <libcpp/os/dll.h>
 #include <libcpp/os/application.hpp>
 
 C_STYLE_EXPORT void quote_info();

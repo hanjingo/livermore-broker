@@ -6,7 +6,8 @@ add_subdirectory(service)
 
 find_package(Boost COMPONENTS 
     filesystem
-    coroutine)
+    coroutine
+    program_options)
 
 find_package(spdlog)
 
@@ -14,14 +15,9 @@ if (NOT DEPS_DIR)
     set(DEPS_DIR ${CMAKE_SOURCE_DIR}/deps)
 endif()
 
-if (NOT LIBCPP_INCLUDE_DIR)
-    set(LIBCPP_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/libcpp)
-endif()
-
-include_directories(${CMAKE_SOURCE_DIR}/src)
-include_directories(${LIBCPP_INCLUDE_DIR})
-include_directories(${DEPS_DIR}/include/quote)
+include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${DEPS_DIR}/include/breakpad)
+include_directories(${CMAKE_SOURCE_DIR}/src)
 
 link_directories(${DEPS_DIR}/lib)
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})

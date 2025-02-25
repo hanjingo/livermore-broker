@@ -4,12 +4,21 @@
 #include <libcpp/log/log.hpp>
 #include <libcpp/os/application.hpp>
 #include <libcpp/os/process.hpp>
-#include <libcpp/util/dll.h>
+#include <libcpp/os/dll.h>
 #include <libcpp/io/filepath.hpp>
 #include <libcpp/sync/coroutine.hpp>
+#include <libcpp/testing/error.hpp>
 
 namespace livermore
 {
+using error_t = libcpp::error_v2<int>;
+
+static error_t ok(0, nullptr);
+static error_t dll_open_fail(1, nullptr);
+static error_t fn_info_not_found(2, nullptr);
+static error_t fn_init_not_found(3, nullptr);
+static error_t fn_run_not_found(4, nullptr);
+static error_t fn_exit_not_found(5, nullptr);
 
 class service
 {
@@ -19,20 +28,11 @@ public:
     typedef int (* fn_run)(void);
     typedef void (* fn_exit)(void);
 
-    enum error {
-        ok = 0,
-        error_dll_open_fail,
-        error_fn_info_not_found,
-        error_fn_init_not_found,
-        error_fn_run_not_found,
-        error_fn_exit_not_found,
-    };
-
 public:
     service() {}
     ~service() {}
 
-    livermore::service::error start(const char* file, bool async = false);
+    livermore::error_t start(const char* file, bool async = false);
 
     void stop();
 
