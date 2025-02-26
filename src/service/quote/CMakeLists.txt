@@ -2,42 +2,54 @@ cmake_minimum_required(VERSION 3.19.2)
 
 set(CMAKE_CXX_STANDARD 11)
 
-if (NOT QUOTE_SHARED_NAME)
-    set(QUOTE_SHARED_NAME quote)
+project(quote)
+
+if (NOT MANAGE_SHARED_NAME)
+    set(MANAGE_SHARED_NAME ${PROJECT_NAME})
 endif()
 
-if (NOT QUOTE_STATIC_NAME)
-    set(QUOTE_STATIC_NAME quote-static)
+if (NOT MANAGE_STATIC_NAME)
+    set(MANAGE_STATIC_NAME ${PROJECT_NAME}-static)
 endif()
 
 find_package(Boost COMPONENTS 
+    filesystem
+    coroutine
     program_options)
 
-include_directories(${Boost_INCLUDE_DIRS})
+find_package(spdlog REQUIRED)
+find_package(fmt REQUIRED)
+
 include_directories(${CMAKE_SOURCE_DIR}/deps/include/breakpad)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 link_directories(${CMAKE_SOURCE_DIR}/deps/lib)
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
-if (BUILD_SHARED)
-    add_library(${QUOTE_SHARED_NAME} SHARED 
-        ${CMAKE_CURRENT_SOURCE_DIR}/quote.cpp
-    )
+aux_source_directory(./ SRC)
 
-    target_link_libraries(${QUOTE_SHARED_NAME} 
+if (BUILD_SHARED)
+    add_library(${MANAGE_SHARED_NAME} SHARED ${SRC})
+
+    target_link_libraries(${MANAGE_SHARED_NAME} 
         ${CMAKE_DL_LIBS}
-        ${Boost_LIBRARIES})
+        ${Boost_LIBRARIES}
+        breakpad_client
+        spdlog::spdlog
+        pthread
+        fmt::fmt)
 endif()
 
 if (BUILD_STATIC)
-    add_library(${QUOTE_STATIC_NAME} STATIC 
-        ${CMAKE_CURRENT_SOURCE_DIR}/quote.cpp
-    )
+    add_library(${MANAGE_STATIC_NAME} STATIC ${SRC})
 
-    target_link_libraries(${QUOTE_STATIC_NAME} 
+    target_link_libraries(${MANAGE_STATIC_NAME} 
         ${CMAKE_DL_LIBS}
-        ${Boost_LIBRARIES})
+        ${Boost_LIBRARIES}
+        breakpad_client
+        spdlog::spdlog
+        pthread
+        fmt::fmt)
 endif()
 
-message("service quote build success")
+message("service ${PROJECT_NAME} build success")

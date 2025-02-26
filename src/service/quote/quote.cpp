@@ -1,24 +1,21 @@
 #include "quote.h"
 
-void quote_info()
+void info()
 {
-    std::cout << "quote info" << std::endl;
+    // TODO
 }
 
-void quote_init()
+int init()
 {
-    std::cout << "quote init" << std::endl;
+    return static_cast<int>(quote::application::init());
 }
 
-int quote_run()
+int run()
 {
-    std::cout << "quote run" << std::endl;
-
-    while (true) { libcpp::application::msleep(5000); }
-    return 0;
+    return static_cast<int>(quote::application::run());
 }
 
-void quote_exit()
+int stop()
 {
-    std::cout << "quote exit" << std::endl;
+    return static_cast<int>(quote::application::stop());
 }

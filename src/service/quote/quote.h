@@ -1,16 +1,17 @@
 #ifndef QUOTE_H
 #define QUOTE_H
 
-#include <iostream>
-#include <libcpp/os/dll.h>
-#include <libcpp/os/application.hpp>
+#include <libcpp/util/dll.h>
 
-C_STYLE_EXPORT void quote_info();
+#include "application.h"
+#include "version.h"
 
-C_STYLE_EXPORT void quote_init();
+C_STYLE_EXPORT void info();
 
-C_STYLE_EXPORT int quote_run();
+C_STYLE_EXPORT int init();
 
-C_STYLE_EXPORT void quote_exit();
+C_STYLE_EXPORT int run();
+
+C_STYLE_EXPORT int stop();
 
 #endif

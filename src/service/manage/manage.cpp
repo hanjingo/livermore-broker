@@ -1,26 +1,21 @@
 #include "manage.h"
 
-void manage_info()
+void info()
 {
-    std::cout << "manage info" << std::endl;
+    // TODO
 }
 
-void manage_init()
+int init()
 {
-    std::cout << "manage init" << std::endl;
+    return static_cast<int>(manage::application::init());
 }
 
-int manage_run()
+int run()
 {
-    std::cout << "manage run" << std::endl;
-
-    while (true) { libcpp::application::msleep(5000); }
-
-    std::cout << "manage quit" << std::endl;
-    return 0;
+    return static_cast<int>(manage::application::run());
 }
 
-void manage_exit()
+int stop()
 {
-    std::cout << "manage exit" << std::endl;
+    return static_cast<int>(manage::application::stop());
 }

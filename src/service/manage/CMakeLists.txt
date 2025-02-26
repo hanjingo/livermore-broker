@@ -13,29 +13,43 @@ if (NOT MANAGE_STATIC_NAME)
 endif()
 
 find_package(Boost COMPONENTS 
+    filesystem
+    coroutine
     program_options)
+
+find_package(spdlog REQUIRED)
+find_package(fmt REQUIRED)
+
+include_directories(${CMAKE_SOURCE_DIR}/deps/include/breakpad)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 link_directories(${CMAKE_SOURCE_DIR}/deps/lib)
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
+aux_source_directory(./ SRC)
+
 if (BUILD_SHARED)
-    add_library(${MANAGE_SHARED_NAME} SHARED 
-        ${CMAKE_CURRENT_SOURCE_DIR}/manage.cpp
-    )
+    add_library(${MANAGE_SHARED_NAME} SHARED ${SRC})
 
     target_link_libraries(${MANAGE_SHARED_NAME} 
         ${CMAKE_DL_LIBS}
-        ${Boost_LIBRARIES})
+        ${Boost_LIBRARIES}
+        breakpad_client
+        spdlog::spdlog
+        pthread
+        fmt::fmt)
 endif()
 
 if (BUILD_STATIC)
-    add_library(${MANAGE_STATIC_NAME} STATIC 
-        ${CMAKE_CURRENT_SOURCE_DIR}/manage.cpp
-    )
+    add_library(${MANAGE_STATIC_NAME} STATIC ${SRC})
 
     target_link_libraries(${MANAGE_STATIC_NAME} 
         ${CMAKE_DL_LIBS}
-        ${Boost_LIBRARIES})
+        ${Boost_LIBRARIES}
+        breakpad_client
+        spdlog::spdlog
+        pthread
+        fmt::fmt)
 endif()
 
-message("service manage build success")
+message("service ${PROJECT_NAME} build success")
