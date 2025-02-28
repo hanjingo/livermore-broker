@@ -53,16 +53,11 @@ project(${PACKAGE_NAME} LANGUAGES CXX DESCRIPTION "The livermore-broker Project"
 option(BUILD_SHARED "Build shared object" ON)
 option(BUILD_STATIC "Build static object" OFF)
 # Options--build
-option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_TESTS "Build test" OFF)
 option(BUILD_BENCHMARK "Build benchmark" OFF)
 
 add_subdirectory(deps)
 add_subdirectory(src)
-
-if (BUILD_EXAMPLES)
-    add_subdirectory(examples)
-endif()
 
 if (BUILD_TESTS)
     add_subdirectory(tests)
