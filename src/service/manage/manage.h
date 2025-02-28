@@ -1,7 +1,7 @@
 #ifndef MANAGE_H
 #define MANAGE_H
 
-#include <libcpp/util/dll.h>
+#include <libcpp/os/dll.h>
 
 #include "application.h"
 #include "version.h"

@@ -5,7 +5,8 @@ project(livermore-broker)
 add_subdirectory(service)
 
 find_package(Boost COMPONENTS 
-    program_options)
+    program_options
+    filesystem)
 
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CMAKE_SOURCE_DIR}/src)
@@ -21,3 +22,5 @@ target_link_libraries(${PROJECT_NAME}
     ${CMAKE_DL_LIBS}
     ${Boost_LIBRARIES}
     pthread)
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config/livermore-broker.ini DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})

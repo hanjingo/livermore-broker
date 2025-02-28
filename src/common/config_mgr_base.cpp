@@ -1,9 +1,15 @@
-#include "config_mgr.h"
+#include "config_mgr_base.h"
 
-namespace quote
+namespace common
 {
 
-void config_mgr::clear()
+config_mgr_base& config_mgr_base::instance()
+{
+    static config_mgr_base inst;
+    return inst;
+}
+
+void config_mgr_base::clear()
 {
     log_path = "";
     log_size = MB(0);
@@ -13,8 +19,9 @@ void config_mgr::clear()
     crash_path = "";
 }
 
-error config_mgr::load(const char* filepath)
+err_t config_mgr_base::load(const char* filepath)
 {
+    LOG_DEBUG("load file:{}", filepath);
     clear();
 
     // parse config
@@ -33,7 +40,7 @@ error config_mgr::load(const char* filepath)
     return check();
 }
 
-error config_mgr::check()
+err_t config_mgr_base::check()
 {
     if (log_size < MB(1))
         return error::log_file_size_too_small;
@@ -45,7 +52,7 @@ error config_mgr::check()
         return error::log_file_num_too_big;
     if (log_min_lvl < libcpp::log_lvl_trace)
         return error::log_lvl_too_small;
-    if (log_min_lvl < libcpp::log_lvl_critial)
+    if (log_min_lvl > libcpp::log_lvl_critial)
         return error::log_lvl_too_big;
     // TODO check crash path
 

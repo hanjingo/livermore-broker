@@ -3,18 +3,28 @@
 namespace quote
 {
 
-error application::init()
+application& application::instance()
 {
-    return error::ok;
-}
+    static application inst;
+    return inst;
+}    
 
-error application::run()
+err_t application::init()
 {
-    return error::ok;
-}
+    LOG_DEBUG("application::init() enter");
+    auto err = common::application_base::init();
+    if (err != error::ok)
+        return err;
 
-error application::stop()
-{
+    // add water mark
+    LOG_INFO("livermore-quote");
+    LOG_INFO("livermore-quote {}.{}.{}", 
+        QUOTE_MAJOR_VERSION, 
+        QUOTE_MINOR_VERSION, 
+        QUOTE_PATCH_VERSION);
+    LOG_INFO("livermore-quote compile time {}", COMPILE_TIME);
+    LOG_INFO("livermore-quote email {}", "hehehunanchina@live.com");
+
     return error::ok;
 }
 

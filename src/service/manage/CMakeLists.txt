@@ -20,8 +20,11 @@ find_package(Boost COMPONENTS
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
 
+set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
+
 include_directories(${CMAKE_SOURCE_DIR}/deps/include/breakpad)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${COMMON_SOURCE_DIR})
 
 link_directories(${CMAKE_SOURCE_DIR}/deps/lib)
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
@@ -29,7 +32,9 @@ link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 aux_source_directory(./ SRC)
 
 if (BUILD_SHARED)
-    add_library(${MANAGE_SHARED_NAME} SHARED ${SRC})
+    add_library(${MANAGE_SHARED_NAME} SHARED ${SRC}
+        ${COMMON_SOURCE_DIR}/application_base.cpp
+        ${COMMON_SOURCE_DIR}/config_mgr_base.cpp)
 
     target_link_libraries(${MANAGE_SHARED_NAME} 
         ${CMAKE_DL_LIBS}

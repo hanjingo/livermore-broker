@@ -1,35 +1,28 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include <string>
-
-#include <libcpp/log/logger.hpp>
-#include <libcpp/types/singleton.hpp>
-#include <libcpp/encoding/ini.hpp>
-#include <libcpp/testing/crash.hpp>
-#include <libcpp/testing/exception.hpp>
-#include <libcpp/os/signal.hpp>
-#include <libcpp/os/env.h>
-#include <libcpp/io/file.hpp>
-
 #include "version.h"
 #include "error.h"
-#include "proc_mgr.h"
+#include "application_base.h"
 #include "config_mgr.h"
+#include "proc_mgr.h"
 
 namespace manage
 {
 
-class application
+class application : public common::application_base
 {
 public:
-    application() = delete;
+    application() {};
+    ~application() {};
     application(const application&) = delete;
     application& operator=(const application&) = delete;
-    
-    static error init();
-    static error run();
-    static error stop();
+
+    static application& instance();
+
+    err_t init();
+    err_t run();
+    err_t stop();
 };
 
 }

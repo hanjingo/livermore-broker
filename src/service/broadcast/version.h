@@ -1,0 +1,10 @@
+#ifndef VERSION_H
+#define VERSION_H
+
+#define BROADCAST_MAJOR_VERSION 1
+#define BROADCAST_MINOR_VERSION 0
+#define BROADCAST_PATCH_VERSION 0
+
+#define MODULE "broadcast"
+
+#endif

@@ -3,48 +3,59 @@
 namespace manage
 {
 
-error application::init()
+application& application::instance()
 {
-    // load cofig
-    auto err = config_mgr::load("livermore-broker.ini");
+    static application inst;
+    return inst;
+}    
+
+err_t application::init()
+{
+    LOG_DEBUG("init() enter");
+    // super init
+    auto err = common::application_base::init();
     if (err != error::ok)
         return err;
 
-    // add log
-    libcpp::logger::instance()->add_sink(
-        libcpp::logger::create_sink(
-            config_mgr::log_path, 
-            config_mgr::log_size, 
-            config_mgr::log_file_num, 
-            config_mgr::log_rotate_on_open));
-    libcpp::logger::instance()->set_level(config_mgr::log_min_lvl);
+    // load our config
+    err = config_mgr::instance().load("livermore-broker.ini");
+    if (err != error::ok)
+        return err;
 
     // add water mark
-    LOG_INFO("livermore-manage {}", MODULE);
+    LOG_INFO("livermore-manage");
     LOG_INFO("livermore-manage {}.{}.{}", 
         MANAGE_MAJOR_VERSION, 
         MANAGE_MINOR_VERSION, 
         MANAGE_PATCH_VERSION);
     LOG_INFO("livermore-manage compile time {}", COMPILE_TIME);
-    LOG_INFO("livermore-manage author {}", "hehehunanchina@live.com");
-
-    // ignore signal
-    libcpp::sigcatch({SIGABRT, SIGTERM}, [](int sig){});
-
-    // add crash handler
-    libcpp::crash_handler::instance()->prevent_set_unhandled_exception_filter();
-    libcpp::crash_handler::instance()->set_local_path(config_mgr::crash_path);
-    LOG_DEBUG("livermore-broker crash set local path={}", config_mgr::crash_path);
+    LOG_INFO("livermore-manage email {}", "hehehunanchina@live.com");
 
     return error::ok;
 }
 
-error application::run()
+err_t application::run()
 {
-    return error::ok;
+    LOG_DEBUG("run() enter");
+    err_t err = error::ok;
+    // add watch list
+    for (std::string serv : config_mgr::instance().services)
+    {
+        proc p{serv};
+        LOG_DEBUG("create service:{}", serv);
+        err = p.run(true);
+        if (err != error::ok)
+            return err;
+
+        err = proc_mgr::instance().add_watch_list(std::move(p));
+        if (err != error::ok)
+            return err;
+    }
+
+    return proc_mgr::instance().watch();
 }
 
-error application::stop()
+err_t application::stop()
 {
     return error::ok;
 }

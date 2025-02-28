@@ -46,6 +46,7 @@
 
 # Depend
 deps/*
+!deps/cmake
 !deps/CMakeLists.txt
 
 # Directory

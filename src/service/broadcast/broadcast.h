@@ -1,9 +1,10 @@
-#ifndef QUOTE_H
-#define QUOTE_H
+#ifndef BROADCAST_H
+#define BROADCAST_H
 
+#include <thread>
+#include <chrono>
 #include <libcpp/os/dll.h>
 
-#include "application.h"
 #include "version.h"
 
 C_STYLE_EXPORT void info();

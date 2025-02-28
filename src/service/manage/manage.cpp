@@ -7,15 +7,15 @@ void info()
 
 int init()
 {
-    return static_cast<int>(manage::application::init());
+    return static_cast<int>(manage::application::instance().init());
 }
 
 int run()
 {
-    return static_cast<int>(manage::application::run());
+    return static_cast<int>(manage::application::instance().run());
 }
 
 int stop()
 {
-    return static_cast<int>(manage::application::stop());
+    return static_cast<int>(manage::application::instance().stop());
 }
