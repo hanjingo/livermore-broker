@@ -15,7 +15,7 @@
 #include <libcpp/io/file.hpp>
 #include <libcpp/util/string_util.hpp>
 
-#include "error.h"
+#include "error_base.h"
 #include "config_mgr_base.h"
 
 namespace common

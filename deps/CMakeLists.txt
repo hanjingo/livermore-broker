@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.19.2)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 
-include(FindFetchCtp)
+# # CTP + v3.7.3_20240910
+# set(CTP_VERSION "v3.7.3_20240910")
+# set(CTP_FETCH_WAY "https")
+# set(CTP_OUTPUT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp)
+# set(CTP_OUTPUT_LIBRARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+# set(CTP_PREFIX_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/ctp)
+# include(FindFetchCtp)

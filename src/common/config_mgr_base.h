@@ -8,8 +8,7 @@
 #include <libcpp/io/file.hpp>
 #include <libcpp/util/string_util.hpp>
 
-#include "error.h"
-#include "version.h"
+#include "error_base.h"
 
 namespace common
 {
@@ -26,6 +25,8 @@ struct config_mgr_base
     virtual void clear();
     virtual err_t load(const char* filepath);
     virtual err_t check();
+
+    std::string module;
 
     std::string log_path;
     FSIZE log_size;

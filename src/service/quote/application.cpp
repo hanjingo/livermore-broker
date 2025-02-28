@@ -12,6 +12,7 @@ application& application::instance()
 err_t application::init()
 {
     LOG_DEBUG("application::init() enter");
+    common::config_mgr_base::instance().module = MODULE;
     auto err = common::application_base::init();
     if (err != error::ok)
         return err;

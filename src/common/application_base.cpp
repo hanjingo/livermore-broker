@@ -18,7 +18,7 @@ err_t application_base::init()
 
     // add log
     libcpp::logger::instance()->add_sink(
-        libcpp::logger::create_sink(
+        libcpp::logger::create_rotate_file_sink(
             config_mgr_base::instance().log_path, 
             config_mgr_base::instance().log_size, 
             config_mgr_base::instance().log_file_num, 

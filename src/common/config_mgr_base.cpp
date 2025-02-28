@@ -29,7 +29,7 @@ err_t config_mgr_base::load(const char* filepath)
     if (!file.read_file(filepath))
         return error::read_config_fail;
 
-    auto cfg = file.get_child(MODULE);
+    auto cfg = file.get_child(module);
     log_path = cfg.get<std::string>("log_path");
     log_size = MB(cfg.get<int>("log_file_size_mb"));
     log_file_num = cfg.get<int>("log_file_num");
