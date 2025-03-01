@@ -21,10 +21,10 @@ FetchContent_Declare(
 set(FMT_FETCH_CONTENT "${FMT_FETCH_WAY}_fmt_${FMT_VERSION}")
 
 # -----------------------check-----------------------------
-if (${CTP_FETCH_WAY} STREQUAL "https")
-else()
-    message(FATAL_ERROR "CAN NOT USE THIS FETCH WAY!!!")
-endif()
+# if (${CTP_FETCH_WAY} STREQUAL "https")
+# else()
+#     message(FATAL_ERROR "CAN NOT USE THIS FETCH WAY!!!")
+# endif()
 
 # -----------------------build-----------------------------
 if (${FETCH_FMT_PASS})
