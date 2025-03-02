@@ -1,62 +1,17 @@
 cmake_minimum_required(VERSION 3.19.2)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
+find_package(Boost REQUIRED)
+find_package(PkgConfig REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(fmt REQUIRED)
 
-# CTP + v3.7.3_20240910
-set(CTP_VERSION "v3.7.3_20240910")
-set(CTP_FETCH_WAY "https")
-set(CTP_SOURCE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp)
-set(CTP_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-include(FindFetchCtp)
+# find_package(GTest REQUIRED)
+# find_package(ZeroMQ REQUIRED)
+# find_package(SQLite3 REQUIRED)
+# find_package(Eigen3 REQUIRED)
+# find_package(httplib REQUIRED)
+# find_package(BehaviorTreeV3 REQUIRED)
+# find_package(OpenSSL REQUIRED)
+# find_package(pugixml REQUIRED)
 
-# fmt + 11.1.4
-set(FMT_VERSION "11.1.4")
-set(FMT_FETCH_WAY "https")
-set(FMT_SOURCE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/fmt)
-set(FMT_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-include(FindFetchFmt)
-
-# breakpad + v2024.02.16
-set(BREAKPAD_VERSION "v2024.02.16")
-set(BREAKPAD_FETCH_WAY "https")
-set(BREAKPAD_SOURCE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/breakpad)
-set(BREAKPAD_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-include(FindFetchBreakpad)
-
-# libcpp + v1.0.0
-set(LIBCPP_VERSION "1.0.0")
-set(LIBCPP_FETCH_WAY "https")
-set(LIBCPP_SOURCE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/libcpp)
-set(LIBCPP_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-include(FindFetchLibcpp)
-
-# spdlog + 1.11.0
-set(SPDLOG_VERSION "1.0.0")
-set(SPDLOG_FETCH_WAY "https")
-set(SPDLOG_SOURCE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/spdlog)
-set(SPDLOG_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-include(FindFetchSpdlog)
-
-# boost + 1.75.0
-set(BOOST_VERSION "1.75.0")
-set(BOOST_FETCH_WAY "https")
-set(BOOST_SOURCE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/boost)
-set(BOOST_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-set(BOOST_USE_STATIC_LIBS true)
-set(BOOST_USE_COROUTINE true)
-set(BOOST_USE_PROGRAM_OPTIONS true)
-include(FindFetchBoost)
-
-# libzmq + v4.3.4
-set(LIBZMQ_VERSION "v4.3.4")
-set(LIBZMQ_FETCH_WAY "https")
-set(LIBZMQ_SOURCE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/libzmq)
-set(LIBZMQ_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-include(FindFetchLibzmq)
-
-# eigen3 + 3.4.0
-set(EIGEN3_VERSION "3.4.0")
-set(EIGEN3_FETCH_WAY "https")
-set(EIGEN3_SOURCE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/eigen3)
-set(EIGEN3_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-include(FindFetchEigen3)
+pkg_check_modules(BREAKPAD REQUIRED breakpad-client)
