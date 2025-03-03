@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.19.2)
 
 project(livermore-broker)
 
+set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../deps/lib/pkgconfig")
+set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../deps/lib/cmake")
+
 add_subdirectory(service)
 
 find_package(Boost COMPONENTS 

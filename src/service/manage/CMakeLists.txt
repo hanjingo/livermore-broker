@@ -4,6 +4,11 @@ set(CMAKE_CXX_STANDARD 11)
 
 project(manage)
 
+set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/pkgconfig")
+set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/cmake")
+set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
+set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../deps)
+
 if (NOT MANAGE_SHARED_NAME)
     set(MANAGE_SHARED_NAME ${PROJECT_NAME})
 endif()
@@ -20,17 +25,14 @@ find_package(Boost COMPONENTS
 find_package(PkgConfig REQUIRED)
 find_package(spdlog REQUIRED)
 
-set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
-set(DEPS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../deps)
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${COMMON_SOURCE_DIR})
-include_directories(${DEPS_SOURCE_DIR}/include)
-include_directories(${DEPS_SOURCE_DIR}/include/breakpad)
-include_directories(${DEPS_SOURCE_DIR}/include/fmt)
+include_directories(${DEPS_DIR}/include)
+include_directories(${DEPS_DIR}/include/breakpad)
+include_directories(${DEPS_DIR}/include/fmt)
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-link_directories(${DEPS_SOURCE_DIR}/lib)
+link_directories(${DEPS_DIR}/lib)
 
 aux_source_directory(./ SRC)
 aux_source_directory(${COMMON_SOURCE_DIR} COMM_SRC)

@@ -4,6 +4,11 @@ set(CMAKE_CXX_STANDARD 11)
 
 project(broadcast)
 
+set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/pkgconfig")
+set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/cmake")
+set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
+set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../deps)
+
 if (NOT MANAGE_SHARED_NAME)
     set(MANAGE_SHARED_NAME ${PROJECT_NAME})
 endif()
@@ -22,17 +27,15 @@ find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
 pkg_check_modules(BREAKPAD REQUIRED breakpad-client)
 
-set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${COMMON_SOURCE_DIR})
 include_directories(${BREAKPAD_INCLUDE_DIRS})
-include_directories(${CMAKE_SOURCE_DIR}/deps/include)
+include_directories(${DEPS_DIR}/include)
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 link_directories(${CTP_LIBRARY_DIR})
 link_directories(${BREAKPAD_LIBRARY_DIRS})
-link_directories(${CMAKE_SOURCE_DIR}/deps/lib)
+link_directories(${DEPS_DIR}/lib)
 
 aux_source_directory(./ SRC)
 aux_source_directory(${COMMON_SOURCE_DIR} COMM_SRC)

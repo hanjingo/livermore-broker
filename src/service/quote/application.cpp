@@ -26,6 +26,9 @@ err_t application::init()
     LOG_INFO("livermore-quote compile time {}", COMPILE_TIME);
     LOG_INFO("livermore-quote email {}", "hehehunanchina@live.com");
 
+    // mkdir
+    
+
     return error::ok;
 }
 

@@ -4,6 +4,11 @@ set(CMAKE_CXX_STANDARD 11)
 
 project(quote)
 
+set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/pkgconfig")
+set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/cmake")
+set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
+set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../deps)
+
 if (NOT MANAGE_SHARED_NAME)
     set(MANAGE_SHARED_NAME ${PROJECT_NAME})
 endif()
