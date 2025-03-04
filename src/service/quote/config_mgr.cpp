@@ -1,6 +1,6 @@
 #include "config_mgr.h"
 
-namespace manage
+namespace quote
 {
 
 config_mgr& config_mgr::instance()
@@ -12,8 +12,7 @@ config_mgr& config_mgr::instance()
 void config_mgr::clear()
 {
     config_mgr_base::clear();
-    serv_scan_dur = std::chrono::milliseconds(0);
-    services.clear();
+    flow_md_path.clear();
 }
 
 err_t config_mgr::load(const char* filepath)
@@ -33,10 +32,8 @@ err_t config_mgr::load(const char* filepath)
     log_rotate_on_open = cfg.get<bool>("log_file_rotate_on_open");
     log_min_lvl = static_cast<libcpp::log_lvl>(cfg.get<int>("log_min_lvl", 1));
     crash_path = cfg.get<std::string>("crash_path");
-    serv_scan_dur = std::chrono::milliseconds(cfg.get<int>("service_scan_dur_ms"));
-    std::string serv_array = cfg.get<std::string>("service_array");
-    services = libcpp::string_util::split(serv_array, ",");
-
+    flow_md_path = cfg.get<std::string>("flow_md_path");
+    
     return check();
 }
 
@@ -45,12 +42,8 @@ err_t config_mgr::check()
     auto err = config_mgr_base::check();
     if (err != error::ok)
         return err;
-    if (serv_scan_dur < std::chrono::milliseconds(10))
-        return error::serv_scan_too_busy;
-    if (serv_scan_dur > std::chrono::minutes(60))
-        return error::serv_scan_too_slow;
-    if (services.size() > 1024)
-        return error::serv_proc_too_much;
+    if (flow_md_path.empty())
+        return error::flow_md_path_empty;
 
     return error::ok;
 }

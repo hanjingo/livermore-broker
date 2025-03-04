@@ -77,8 +77,8 @@ find_package(Boost)
 if (NOT Boost_FOUND)
     set(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/src/boost")
     ExternalProject_Add(boost
-        GIT_REPOSITORY https://github.com/boostorg/boost.git
-        GIT_TAG boost-1.75.0
+        URL https://archives.boost.io/release/1.75.0/source/boost_1_75_0.zip
+        DOWNLOAD_NAME boost_1_75_0.zip
         PREFIX ${CMAKE_CURRENT_SOURCE_DIR}
         CONFIGURE_COMMAND ""
         BUILD_COMMAND cd ${BOOST_ROOT} && ./bootstrap.sh --prefix=${CMAKE_CURRENT_SOURCE_DIR}

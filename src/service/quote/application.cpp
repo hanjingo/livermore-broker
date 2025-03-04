@@ -12,8 +12,8 @@ application& application::instance()
 err_t application::init()
 {
     LOG_DEBUG("application::init() enter");
-    common::config_mgr_base::instance().module = MODULE;
-    auto err = common::application_base::init();
+    config_mgr::instance().module = MODULE;
+    auto err = config_mgr::init();
     if (err != error::ok)
         return err;
 
@@ -27,9 +27,18 @@ err_t application::init()
     LOG_INFO("livermore-quote email {}", "hehehunanchina@live.com");
 
     // mkdir
-    
+    if (!libcpp::file_path::make_dir(config_mgr::instance().flow_md_path))
+    {
+        LOG_ERROR("make flow_md_path={0} fail", config_mgr::instance().flow_md_path);
+        return error::create_flow_md_path_fail;
+    }
 
     return error::ok;
+}
+
+err_t application::run()
+{
+    
 }
 
 }

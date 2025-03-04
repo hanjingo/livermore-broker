@@ -8,6 +8,8 @@
 #include <ctp-traderAPI/ThostFtdcUserApiStruct.h>
 #include <ctp-traderAPI/ThostFtdcUserApiDataType.h>
 
+#include <libcpp/util/string_util.hpp>
+
 namespace quote
 {
 
