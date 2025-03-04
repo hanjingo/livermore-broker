@@ -31,14 +31,7 @@ bool proc::is_running()
     return _child.valid() && _child.running();
 }
 
-
-proc_mgr& proc_mgr::instance()
-{
-    static proc_mgr inst;
-    return inst;
-}
-
-error proc_mgr::watch()
+error proc_mgr::watch(const std::chrono::milliseconds dur)
 {
     while (true)
     {
@@ -51,7 +44,7 @@ error proc_mgr::watch()
             LOG_INFO("server {} run...", ptr->second.tag());
         }
 
-        std::this_thread::sleep_for(config_mgr::instance().serv_scan_dur);
+        std::this_thread::sleep_for(dur);
     }
 }
 

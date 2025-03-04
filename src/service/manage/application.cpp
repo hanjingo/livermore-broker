@@ -11,15 +11,15 @@ application& application::instance()
 
 err_t application::init()
 {
-    LOG_DEBUG("init() enter");
-    // super init
-    common::config_mgr_base::instance().module = MODULE;
-    auto err = common::application_base::init();
+    LOG_DEBUG("manage application::init() enter");
+    // load our config
+    conf.module = MODULE;
+    err_t err = conf.load("livermore-broker.ini");
     if (err != error::ok)
         return err;
 
-    // load our config
-    err = config_mgr::instance().load("livermore-broker.ini");
+    // super init
+    err = common::application_base::init(conf);
     if (err != error::ok)
         return err;
 
@@ -37,10 +37,10 @@ err_t application::init()
 
 err_t application::run()
 {
-    LOG_DEBUG("run() enter");
+    LOG_DEBUG("manage run() enter");
     err_t err = error::ok;
     // add watch list
-    for (std::string serv : config_mgr::instance().services)
+    for (std::string serv : conf.services)
     {
         proc p{serv};
         LOG_DEBUG("create service:{}", serv);
@@ -48,17 +48,12 @@ err_t application::run()
         if (err != error::ok)
             return err;
 
-        err = proc_mgr::instance().add_watch_list(std::move(p));
+        err = procs.add_watch_list(std::move(p));
         if (err != error::ok)
             return err;
     }
 
-    return proc_mgr::instance().watch();
-}
-
-err_t application::stop()
-{
-    return error::ok;
+    return procs.watch(conf.serv_scan_dur);
 }
 
 }

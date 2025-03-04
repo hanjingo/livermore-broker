@@ -5,21 +5,10 @@
 #include <libcpp/os/dll.h>
 #include <libcpp/sync/coroutine.hpp>
 
+#include "common/error_base.h"
+
 namespace livermore
 {
-enum class error
-{
-    // error code range [0, 99]
-    ok = 0,
-    fail,
-    dll_open_fail,
-    fn_info_not_found,
-    fn_init_not_found,
-    fn_run_not_found,
-    fn_stop_not_found,
-
-    // give [100, ...] to service
-};
 
 class service
 {
@@ -33,10 +22,10 @@ public:
     service() {}
     ~service() {}
 
-    livermore::error load(const char* file);
-    livermore::error init();
-    livermore::error start(bool async = false);
-    livermore::error stop();
+    err_t load(const char* file);
+    err_t init();
+    err_t start(bool async = false);
+    err_t stop();
 
 private:
     void* _handler;

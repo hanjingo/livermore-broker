@@ -6,6 +6,7 @@
 #include <libcpp/os/env.h>
 #include <libcpp/os/application.hpp>
 
+#include "common/error_base.h"
 #include "service.h"
 
 using namespace livermore;
@@ -21,17 +22,17 @@ int main(int argc, char* argv[])
     livermore::service serv{};
     auto dll = std::string("lib").append(module).append(DLL_EXT);
 
-    auto err = serv.load(dll.c_str());
-    libcpp::throw_if_not_equal(err, error::ok, 
-        std::string("load service fail, with error code=").append(std::to_string(static_cast<int>(err))).c_str());
+    err_t err = serv.load(dll.c_str());
+    libcpp::throw_if_false(err == common::error::ok, 
+        std::string("load service ").append(dll).append(" fail, with error code=").append(std::to_string(static_cast<int>(err))).c_str());
 
     err = serv.init();
-    libcpp::throw_if_not_equal(err, error::ok, 
-        std::string("init service fail, with error code=").append(std::to_string(static_cast<int>(err))).c_str());
+    libcpp::throw_if_false(err == common::error::ok, 
+        std::string("init service ").append(dll).append(" fail, with error code=").append(std::to_string(static_cast<int>(err))).c_str());
 
     err = serv.start();
-    libcpp::throw_if_not_equal(err, error::ok, 
-        std::string("start service fail, with error code=").append(std::to_string(static_cast<int>(err))).c_str());
+    libcpp::throw_if_false(err == common::error::ok, 
+        std::string("start service ").append(dll).append(" fail, with error code=").append(std::to_string(static_cast<int>(err))).c_str());
 
     return 0;
 }

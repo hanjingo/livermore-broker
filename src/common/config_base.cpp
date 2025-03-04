@@ -1,15 +1,9 @@
-#include "config_mgr_base.h"
+#include "config_base.h"
 
 namespace common
 {
 
-config_mgr_base& config_mgr_base::instance()
-{
-    static config_mgr_base inst;
-    return inst;
-}
-
-void config_mgr_base::clear()
+void config_base::clear()
 {
     log_path = "";
     log_size = MB(0);
@@ -19,9 +13,9 @@ void config_mgr_base::clear()
     crash_path = "";
 }
 
-err_t config_mgr_base::load(const char* filepath)
+err_t config_base::load(const char* filepath)
 {
-    LOG_DEBUG("load file:{}", filepath);
+    LOG_DEBUG("config base load file:{}", filepath);
     clear();
 
     // parse config
@@ -40,7 +34,7 @@ err_t config_mgr_base::load(const char* filepath)
     return check();
 }
 
-err_t config_mgr_base::check()
+err_t config_base::check()
 {
     if (log_size < MB(1))
         return error::log_file_size_too_small;

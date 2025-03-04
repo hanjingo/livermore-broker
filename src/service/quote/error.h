@@ -12,12 +12,25 @@ enum error : err_t
 
 ok = 0x0,
 
-error_start = 0x100,
-flow_md_path_empty,
-create_flow_md_path_fail,
-error_end = 0xFFF,
+error_start = 0x400,
+ctp_ip_empty,
+ctp_port_invalid,
+ctp_flow_md_path_empty,
+ctp_create_flow_md_path_fail,
+ctp_null,
+ctp_current_status_not_allowed_connect,
+ctp_current_status_not_allowed_login,
+ctp_current_status_not_allowed_logging_out,
+ctp_request_user_login_fail,
+
+ctp_read_fail = 0x1000,
+ctp_write_fail,
+
+ctp_heartbeat_timeout = 0x2001,
+ctp_heartbeat_fail,
+ctp_recv_invalid_msg,
+error_end = 0x1FFF,
 };
 
 }
-
 #endif

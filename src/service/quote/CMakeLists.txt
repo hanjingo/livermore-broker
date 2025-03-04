@@ -27,8 +27,6 @@ find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
 pkg_check_modules(BREAKPAD REQUIRED breakpad-client)
 
-set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${COMMON_SOURCE_DIR})
 include_directories(${BREAKPAD_INCLUDE_DIRS})
@@ -43,9 +41,7 @@ aux_source_directory(./ SRC)
 aux_source_directory(${COMMON_SOURCE_DIR} COMM_SRC)
 
 if (BUILD_SHARED)
-    add_library(${MANAGE_SHARED_NAME} SHARED ${SRC}
-        ${COMMON_SOURCE_DIR}/application_base.cpp
-        ${COMMON_SOURCE_DIR}/config_mgr_base.cpp)
+    add_library(${MANAGE_SHARED_NAME} SHARED ${SRC} ${COMM_SRC})
 
     target_link_libraries(${MANAGE_SHARED_NAME} 
         ${CMAKE_DL_LIBS}
@@ -53,7 +49,9 @@ if (BUILD_SHARED)
         breakpad_client
         spdlog::spdlog
         pthread
-        fmt::fmt)
+        fmt::fmt
+        soptthostmduserapi_se
+        soptthosttraderapi_se)
 endif()
 
 if (BUILD_STATIC)
@@ -65,7 +63,9 @@ if (BUILD_STATIC)
         breakpad_client
         spdlog::spdlog
         pthread
-        fmt::fmt)
+        fmt::fmt
+        soptthostmduserapi_se
+        soptthosttraderapi_se)
 endif()
 
 message("service ${PROJECT_NAME} build success")

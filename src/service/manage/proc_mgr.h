@@ -14,7 +14,6 @@
 
 #include "version.h"
 #include "error.h"
-#include "config_mgr.h"
 
 namespace manage
 {
@@ -50,12 +49,8 @@ class proc_mgr
 public:
     proc_mgr() {}
     ~proc_mgr() {}
-    proc_mgr(const proc_mgr&) = delete;
-    proc_mgr& operator=(const proc_mgr&) = delete;
 
-    static proc_mgr& instance();
-
-    error watch();
+    error watch(const std::chrono::milliseconds dur);
     error add_watch_list(proc&& p);
 
 private:

@@ -3,139 +3,211 @@
 namespace quote
 {
 
-void ctp::connect(const int port, const char* ip, const char* psz_flow_path, const bool is_using_udp, const bool is_multicast)
+ctp::stat ctp::status_change(const stat new_stat)
 {
+	ctp::stat old_stat = _stat.load();
+	switch (new_stat)
+	{
+		case stat::disconnected: { 
+			if (old_stat != stat::connecting && old_stat != stat::connected)
+				return old_stat;
+			break;
+		}
+		case stat::connecting: { 
+			if (old_stat != stat::disconnected)
+				return old_stat;
+			break;
+		}
+		case stat::connected: { 
+			if (old_stat != stat::connecting && old_stat != stat::logging_out)
+				return old_stat;
+			break;
+		}
+		case stat::logging: { 
+			if (old_stat != stat::connected)
+				return old_stat;
+			break; 
+		}
+		case stat::logged: { 
+			if (old_stat != stat::logging)
+				return old_stat;
+			break; 
+		}
+		case stat::logging_out: { 
+			if (old_stat != stat::logged)
+				return old_stat;
+			break;
+		}
+		default: return old_stat;
+	}
+	
+
+	return _stat.compare_exchange_weak(old_stat, new_stat) ? new_stat : old_stat;
+}
+
+error ctp::connect(const int port, 
+				   const char* ip, 
+				   const char* psz_flow_path, 
+				   const bool is_using_udp, 
+				   const bool is_multicast,
+				   const unsigned int timeout_dur_ms)
+{
+	if (status_change(stat::connecting) != stat::connecting)
+		return error::ctp_current_status_not_allowed_connect;
+
     _mdapi = CThostFtdcMdApi::CreateFtdcMdApi(psz_flow_path, is_using_udp, is_multicast);
     _mdapi->RegisterSpi(this);
     if (!is_using_udp)
     {
-        _mdapi->RegisterFront(libcpp::string_util::fmt("tcp://{0}:{1}", ip, port).c_str());
+		char addr[27] = {0};
+        sprintf(addr, "tcp://%s:%d", ip, port);
+        _mdapi->RegisterFront(addr);
     } else {
         // TODO
     }
-    _mdapi->Init();
+    _mdapi->Init(); // return by OnFrontConnected
+
+	return error::ok;
 }
 
-void ctp::login(unsigned int retry_times, unsigned int retry_interval_ms)
+error ctp::login(unsigned int retry_times, unsigned int retry_interval_ms)
 {
+	if (status_change(stat::logging) != stat::logging)
+		return error::ctp_current_status_not_allowed_login;
+
+	_login_retry_times = retry_times;
+	_login_retry_interval_ms = retry_interval_ms;
     std::chrono::milliseconds dur{retry_interval_ms};
     CThostFtdcReqUserLoginField field = {0};
-    while(retry_times != 0)
-    {
-        if (_mdapi->ReqUserLogin(&field, 1) == 0)
-            return;
+	if (_mdapi->ReqUserLogin(&field, _request_id) != 0)
+		return error::ctp_request_user_login_fail;
 
-        retry_times--;
-        std::this_thread::sleep_for(dur);
-    }
+	return error::ok;
 }
 
-bool ctp::subscribe(char** instruments)
+error ctp::logout()
 {
-    return _mdapi->SubscribeMarketData(instruments, 1) == 0;
+	if (status_change(stat::logging_out) != stat::logging_out)
+		return error::ctp_current_status_not_allowed_logging_out;
+
+	return error::ok;
 }
 
+error ctp::subscribe(const std::vector<std::string>& instruments)
+{
+	if (!instruments.empty())
+	{
+		for (auto e : instruments) 
+		{
+			_instruments[_instruments_row++] = new char[7];
+			memcpy(_instruments[_instruments_row], e.c_str(), 7);
+		}
+	}
+	
+    if (status() != stat::logged) 
+		return error::ok;
+	_mdapi->SubscribeMarketData(_instruments, _request_id);
+	return error::ok;
+}
+
+void ctp::OnFrontConnected()
+{
+	if (status_change(stat::connected) != stat::connected)
+		LOG_ERROR("ctp connected stat change fail");
+	else
+		LOG_INFO("ctp connected");
+
+	login();
+}
+
+void ctp::OnFrontDisconnected(int nReason)
+{
+	if (status_change(stat::disconnected) != stat::disconnected)
+		LOG_ERROR("ctp disconnected stat change fail");
+	else
+		LOG_INFO("ctp disconnected");
+}
+
+void ctp::OnHeartBeatWarning(int nTimeLapse)
+{
+	LOG_WARN("heartbeat timeout with nTimeLapse={}", nTimeLapse);
+}
+
+void ctp::OnRspUserLogin(
+    CThostFtdcRspUserLoginField *pRspUserLogin, 
+    CThostFtdcRspInfoField *pRspInfo, 
+    int nRequestID, 
+    bool bIsLast)
+{
+	_login_retry_times--;
+	if (pRspInfo->ErrorID != 0)
+	{
+		LOG_ERROR("login fail with pRspInfo->ErrorID={0}", pRspInfo->ErrorID);
+		return;
+	}
+
+	if (status_change(stat::logged) != stat::logged)
+	{
+		LOG_ERROR("current status not allowed login");
+		return;
+	}
+
+	subscribe();
+	LOG_INFO("login success");
+}
+    
+void ctp::OnRspUserLogout(
+	CThostFtdcUserLogoutField *pUserLogout, 
+    CThostFtdcRspInfoField *pRspInfo, 
+    int nRequestID, 
+    bool bIsLast)
+{
+	LOG_DEBUG("OnRspUserLogout");
+}
+
+void ctp::OnRspError(
+    CThostFtdcRspInfoField *pRspInfo, 
+    int nRequestID, 
+    bool bIsLast)
+{
+	LOG_DEBUG("OnRspError");
+}
+
+void ctp::OnRspSubMarketData(
+    CThostFtdcSpecificInstrumentField *pSpecificInstrument, 
+    CThostFtdcRspInfoField *pRspInfo, 
+    int nRequestID, 
+    bool bIsLast)
+{
+	LOG_DEBUG("OnRspSubMarketData");
+}
+
+void ctp::OnRspUnSubMarketData(
+    CThostFtdcSpecificInstrumentField *pSpecificInstrument, 
+    CThostFtdcRspInfoField *pRspInfo, 
+    int nRequestID, 
+    bool bIsLast)
+{
+	LOG_DEBUG("OnRspUnSubMarketData");
+}
 
 void ctp::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *pDepthMarketData)
 {
-    // ///交易日
-	// TThostFtdcDateType	TradingDay;
-	// ///合约代码
-	// TThostFtdcInstrumentIDType	InstrumentID;
-	// ///交易所代码
-	// TThostFtdcExchangeIDType	ExchangeID;
-	// ///合约在交易所的代码
-	// TThostFtdcExchangeInstIDType	ExchangeInstID;
-	// ///最新价
-	// TThostFtdcPriceType	LastPrice;
-	// ///上次结算价
-	// TThostFtdcPriceType	PreSettlementPrice;
-	// ///昨收盘
-	// TThostFtdcPriceType	PreClosePrice;
-	// ///昨持仓量
-	// TThostFtdcLargeVolumeType	PreOpenInterest;
-	// ///今开盘
-	// TThostFtdcPriceType	OpenPrice;
-	// ///最高价
-	// TThostFtdcPriceType	HighestPrice;
-	// ///最低价
-	// TThostFtdcPriceType	LowestPrice;
-	// ///数量
-	// TThostFtdcVolumeType	Volume;
-	// ///成交金额
-	// TThostFtdcMoneyType	Turnover;
-	// ///持仓量
-	// TThostFtdcLargeVolumeType	OpenInterest;
-	// ///今收盘
-	// TThostFtdcPriceType	ClosePrice;
-	// ///本次结算价
-	// TThostFtdcPriceType	SettlementPrice;
-	// ///涨停板价
-	// TThostFtdcPriceType	UpperLimitPrice;
-	// ///跌停板价
-	// TThostFtdcPriceType	LowerLimitPrice;
-	// ///昨虚实度
-	// TThostFtdcRatioType	PreDelta;
-	// ///今虚实度
-	// TThostFtdcRatioType	CurrDelta;
-	// ///最后修改时间
-	// TThostFtdcTimeType	UpdateTime;
-	// ///最后修改毫秒
-	// TThostFtdcMillisecType	UpdateMillisec;
-	// ///申买价一
-	// TThostFtdcPriceType	BidPrice1;
-	// ///申买量一
-	// TThostFtdcVolumeType	BidVolume1;
-	// ///申卖价一
-	// TThostFtdcPriceType	AskPrice1;
-	// ///申卖量一
-	// TThostFtdcVolumeType	AskVolume1;
-	// ///申买价二
-	// TThostFtdcPriceType	BidPrice2;
-	// ///申买量二
-	// TThostFtdcVolumeType	BidVolume2;
-	// ///申卖价二
-	// TThostFtdcPriceType	AskPrice2;
-	// ///申卖量二
-	// TThostFtdcVolumeType	AskVolume2;
-	// ///申买价三
-	// TThostFtdcPriceType	BidPrice3;
-	// ///申买量三
-	// TThostFtdcVolumeType	BidVolume3;
-	// ///申卖价三
-	// TThostFtdcPriceType	AskPrice3;
-	// ///申卖量三
-	// TThostFtdcVolumeType	AskVolume3;
-	// ///申买价四
-	// TThostFtdcPriceType	BidPrice4;
-	// ///申买量四
-	// TThostFtdcVolumeType	BidVolume4;
-	// ///申卖价四
-	// TThostFtdcPriceType	AskPrice4;
-	// ///申卖量四
-	// TThostFtdcVolumeType	AskVolume4;
-	// ///申买价五
-	// TThostFtdcPriceType	BidPrice5;
-	// ///申买量五
-	// TThostFtdcVolumeType	BidVolume5;
-	// ///申卖价五
-	// TThostFtdcPriceType	AskPrice5;
-	// ///申卖量五
-	// TThostFtdcVolumeType	AskVolume5;
-	// ///当日均价
-	// TThostFtdcPriceType	AveragePrice;
-	// ///业务日期
-	// TThostFtdcDateType	ActionDay;
-	// ///熔断参考价
-	// TThostFtdcPriceType	CircuitRefPrice;
-	// ///行情发送时间
-	// TThostFtdcSendingTimeType	SendingTime;
-	// ///成交量（long long）
-	// TThostFtdcBigVolumeType	BigVolume;
-
+	LOG_DEBUG("OnRtnDepthMarketData");
+}
     
-    // TODO dispatch task
-    LOG_DEBUG("");
+void ctp::OnRspSubForQuoteRsp(
+    CThostFtdcSpecificInstrumentField *pSpecificInstrument, 
+    CThostFtdcRspInfoField *pRspInfo, 
+    int nRequestID, 
+    bool bIsLast)
+{
+	LOG_DEBUG("OnRspSubForQuoteRsp");
+}
+
+void ctp::OnRtnForQuoteRsp(CThostFtdcForQuoteRspField *pForQuoteRsp)
+{
+	LOG_DEBUG("OnRtnForQuoteRsp");
 }
 
 }

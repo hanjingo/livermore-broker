@@ -1,5 +1,5 @@
-#ifndef CONFIG_MGR_BASE_H
-#define CONFIG_MGR_BASE_H
+#ifndef CONFIG_BASE_H
+#define CONFIG_BASE_H
 
 #include <string>
 #include <chrono>
@@ -13,14 +13,10 @@
 namespace common
 {
 
-struct config_mgr_base
+struct config_base
 {
-    config_mgr_base() {};
-    ~config_mgr_base() {};
-    config_mgr_base(const config_mgr_base&) = delete;
-    config_mgr_base& operator=(const config_mgr_base&) = delete;
-
-    static config_mgr_base& instance();
+    config_base() {};
+    ~config_base() {};
 
     virtual void clear();
     virtual err_t load(const char* filepath);

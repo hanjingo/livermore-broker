@@ -16,7 +16,7 @@
 #include <libcpp/util/string_util.hpp>
 
 #include "error_base.h"
-#include "config_mgr_base.h"
+#include "config_base.h"
 
 namespace common
 {
@@ -26,12 +26,8 @@ class application_base
 public:
     application_base() {};
     ~application_base() {};
-    application_base(const application_base&) = delete;
-    application_base& operator=(const application_base&) = delete;
 
-    static application_base& instance();
-
-    virtual err_t init();
+    virtual err_t init(const common::config_base& config);
     virtual err_t run();
     virtual err_t stop();
 };
