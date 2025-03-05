@@ -3,11 +3,9 @@
 
 #include "version.h"
 #include "error.h"
-#include "application_base.h"
 #include "config.h"
 #include "ctp.h"
-
-#include <libcpp/io/filepath.hpp>
+#include "application_base.h"
 
 namespace quote
 {
@@ -26,9 +24,7 @@ public:
     err_t run() override;
 
     quote::config conf;
-
-private:
-    quote::ctp* _ctp;
+    quote::ctp ctp_obj;
 };
 
 }

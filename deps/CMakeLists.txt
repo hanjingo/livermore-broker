@@ -95,14 +95,26 @@ ExternalProject_Add(ctp-traderAPI
 if (UNIX)
     set(CTP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp-traderAPI/v3.7.3_20240910_api_traderapi_linux64_se)
     file(GLOB all_ctp_so "${CTP_ROOT}/*.so")
-    file(COPY ${all_ctp_so} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+    file(COPY ${all_ctp_so} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib
+         FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
+    file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/lib/soptthostmduserapi_se.so ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthostmduserapi_se.so)
+    file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/lib/soptthosttraderapi_se.so ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthosttraderapi_se.so)
 
     file(GLOB all_ctp_src "${CTP_ROOT}/*.h")
     file(COPY ${all_ctp_src} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp-traderAPI)
 elseif (WIN32)
     set(CTP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp-traderAPI/3.7.3_winapi_202409101516/20240910_traderapi64_windows_se)
-    file(GLOB all_ctp_dll "${CTP_ROOT}/*.dll,*.lib")
-    file(COPY ${all_ctp_dll} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+    file(GLOB all_ctp_dll "${CTP_ROOT}/*.dll")
+    file(COPY ${all_ctp_dll} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib
+         FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
+    file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/lib/soptthostmduserapi_se.dll ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthostmduserapi_se.dll)
+    file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/lib/soptthosttraderapi_se.dll ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthosttraderapi_se.dll)
+
+    file(GLOB all_ctp_lib "${CTP_ROOT}/*.lib")
+    file(COPY ${all_ctp_lib} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib
+         FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
+    file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/lib/soptthostmduserapi_se.lib ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthostmduserapi_se.lib)
+    file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/lib/soptthosttraderapi_se.lib ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthosttraderapi_se.lib)
 
     file(GLOB all_ctp_src "${CTP_ROOT}/*.h")
     file(COPY ${all_ctp_src} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp-traderAPI)

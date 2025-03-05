@@ -9,12 +9,12 @@ set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/cmake")
 set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
 set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../deps)
 
-if (NOT MANAGE_SHARED_NAME)
-    set(MANAGE_SHARED_NAME ${PROJECT_NAME})
+if (NOT QUOTE_SHARED_NAME)
+    set(QUOTE_SHARED_NAME ${PROJECT_NAME})
 endif()
 
-if (NOT MANAGE_STATIC_NAME)
-    set(MANAGE_STATIC_NAME ${PROJECT_NAME}-static)
+if (NOT QUOTE_STATIC_NAME)
+    set(QUOTE_STATIC_NAME ${PROJECT_NAME}-static)
 endif()
 
 find_package(Boost COMPONENTS 
@@ -23,49 +23,51 @@ find_package(Boost COMPONENTS
     program_options)
 
 find_package(PkgConfig REQUIRED)
+pkg_check_modules(BREAKPAD REQUIRED breakpad-client)
+
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
-pkg_check_modules(BREAKPAD REQUIRED breakpad-client)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${COMMON_SOURCE_DIR})
-include_directories(${BREAKPAD_INCLUDE_DIRS})
-include_directories(${CMAKE_SOURCE_DIR}/deps/include)
+include_directories(${DEPS_DIR}/include)
+include_directories(${DEPS_DIR}/include/breakpad)
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-link_directories(${CTP_LIBRARY_DIR})
-link_directories(${BREAKPAD_LIBRARY_DIRS})
-link_directories(${CMAKE_SOURCE_DIR}/deps/lib)
+link_directories(${DEPS_DIR}/lib)
 
 aux_source_directory(./ SRC)
 aux_source_directory(${COMMON_SOURCE_DIR} COMM_SRC)
 
-if (BUILD_SHARED)
-    add_library(${MANAGE_SHARED_NAME} SHARED ${SRC} ${COMM_SRC})
+find_library(CTP_MDAPI soptthostmduserapi_se PATH ${DEPS_DIR}/lib)
+find_library(CTP_TRADER soptthosttraderapi_se PATH ${DEPS_DIR}/lib)
 
-    target_link_libraries(${MANAGE_SHARED_NAME} 
+if (BUILD_SHARED)
+    add_library(${QUOTE_SHARED_NAME} SHARED ${SRC} ${COMM_SRC})
+
+    target_link_libraries(${QUOTE_SHARED_NAME} 
         ${CMAKE_DL_LIBS}
         ${Boost_LIBRARIES}
+        ${CTP_MDAPI}
+        ${CTP_TRADER}
         breakpad_client
         spdlog::spdlog
-        pthread
         fmt::fmt
-        soptthostmduserapi_se
-        soptthosttraderapi_se)
+        pthread)
 endif()
 
 if (BUILD_STATIC)
-    add_library(${MANAGE_STATIC_NAME} STATIC ${SRC} ${COMM_SRC})
+    add_library(${QUOTE_STATIC_NAME} STATIC ${SRC} ${COMM_SRC})
 
-    target_link_libraries(${MANAGE_STATIC_NAME} 
+    target_link_libraries(${QUOTE_STATIC_NAME} 
         ${CMAKE_DL_LIBS}
         ${Boost_LIBRARIES}
+        ${CTP_MDAPI}
+        ${CTP_TRADER}
         breakpad_client
         spdlog::spdlog
-        pthread
         fmt::fmt
-        soptthostmduserapi_se
-        soptthosttraderapi_se)
+        pthread)
 endif()
 
 message("service ${PROJECT_NAME} build success")

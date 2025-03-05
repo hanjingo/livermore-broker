@@ -3,11 +3,6 @@
 
 #include <vector>
 #include <string>
-#include <chrono>
-#include <libcpp/log/logger.hpp>
-#include <libcpp/encoding/ini.hpp>
-#include <libcpp/io/file.hpp>
-#include <libcpp/util/string_util.hpp>
 
 #include "error.h"
 #include "version.h"
@@ -21,7 +16,7 @@ struct config : public common::config_base
     config() : common::config_base() {};
     ~config() {};
 
-    void clear() override
+    void clear() override;
     err_t load(const char* filepath) override;
     err_t check() override;
 

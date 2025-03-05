@@ -1,5 +1,11 @@
 #include "proc_mgr.h"
 
+#include <libcpp/log/logger.hpp>
+#include <libcpp/os/application.hpp>
+#include <libcpp/types/singleton.hpp>
+#include <libcpp/sync/defer.hpp>
+#include <libcpp/util/string_util.hpp>
+
 namespace manage
 {
 
@@ -20,7 +26,6 @@ err_t proc::run(const bool single)
         return error::proc_already_running;
 
     auto cmd = libcpp::string_util::fmt("{} --module={}", _cmd, _tag);
-    LOG_DEBUG("cmd={}", cmd);
     _child = libcpp::process::child(cmd);
     _child.detach();
     return error::ok;

@@ -3,9 +3,9 @@
 
 #include "version.h"
 #include "error.h"
-#include "application_base.h"
 #include "config.h"
 #include "proc_mgr.h"
+#include "application_base.h"
 
 namespace manage
 {

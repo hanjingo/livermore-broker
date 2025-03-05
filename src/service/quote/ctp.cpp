@@ -1,4 +1,8 @@
 #include "ctp.h"
+#include "string.h"
+
+#include <libcpp/log/logger.hpp>
+#include <libcpp/sync/defer.hpp>
 
 namespace quote
 {
@@ -41,7 +45,6 @@ ctp::stat ctp::status_change(const stat new_stat)
 		default: return old_stat;
 	}
 	
-
 	return _stat.compare_exchange_weak(old_stat, new_stat) ? new_stat : old_stat;
 }
 
@@ -50,36 +53,53 @@ error ctp::connect(const int port,
 				   const char* psz_flow_path, 
 				   const bool is_using_udp, 
 				   const bool is_multicast,
-				   const unsigned int timeout_dur_ms)
+				   unsigned int timeout_ms)
 {
 	if (status_change(stat::connecting) != stat::connecting)
 		return error::ctp_current_status_not_allowed_connect;
 
-    _mdapi = CThostFtdcMdApi::CreateFtdcMdApi(psz_flow_path, is_using_udp, is_multicast);
-    _mdapi->RegisterSpi(this);
-    if (!is_using_udp)
-    {
-		char addr[27] = {0};
-        sprintf(addr, "tcp://%s:%d", ip, port);
-        _mdapi->RegisterFront(addr);
-    } else {
-        // TODO
-    }
-    _mdapi->Init(); // return by OnFrontConnected
+	_mdapi = CThostFtdcMdApi::CreateFtdcMdApi(psz_flow_path, is_using_udp, is_multicast);
+	if (_mdapi == nullptr)
+		return error::ctp_create_mdapi_fail;
 
-	return error::ok;
+	_mdapi->RegisterSpi(this);
+	if (!is_using_udp)
+	{
+		char addr[27] = {0};
+		sprintf(addr, "tcp://%s:%d", ip, port);
+		LOG_INFO("register front server with addr={}", addr);
+		_mdapi->RegisterFront(addr);
+	} else {
+		// TODO
+	}
+	_mdapi->Init();
+
+	if (timeout_ms == -1)
+	{
+		_mdapi->Join();
+		return error::ok;
+	}
+	
+	while (timeout_ms > 0)
+	{
+		if (status() == stat::connected)
+			return error::ok;
+
+		timeout_ms--;
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
+
+	return error::ctp_connect_timeout;
 }
 
 error ctp::login(unsigned int retry_times, unsigned int retry_interval_ms)
 {
+	retry_times--;
 	if (status_change(stat::logging) != stat::logging)
 		return error::ctp_current_status_not_allowed_login;
 
-	_login_retry_times = retry_times;
-	_login_retry_interval_ms = retry_interval_ms;
-    std::chrono::milliseconds dur{retry_interval_ms};
     CThostFtdcReqUserLoginField field = {0};
-	if (_mdapi->ReqUserLogin(&field, _request_id) != 0)
+	if (_mdapi->ReqUserLogin(&field, req_id()) != 0)
 		return error::ctp_request_user_login_fail;
 
 	return error::ok;
@@ -93,31 +113,66 @@ error ctp::logout()
 	return error::ok;
 }
 
-error ctp::subscribe(const std::vector<std::string>& instruments)
+error ctp::subscribe_market_data(const std::vector<std::string>& instruments)
 {
-	if (!instruments.empty())
-	{
-		for (auto e : instruments) 
-		{
-			_instruments[_instruments_row++] = new char[7];
-			memcpy(_instruments[_instruments_row], e.c_str(), 7);
-		}
-	}
+	if (instruments.empty())
+		return error::ok;
 	
+	int row = 0;
+	char* tmp[INSTRUMENT_LEN];
+	DEFER(
+		for (int i = 0; i < row; ++i)
+			delete tmp[i];
+		delete tmp;
+	)
+	for (auto id : instruments) 
+	{
+		auto itr = _m_market_data.find(id);
+		if (itr != _m_market_data.end()) 
+			continue;
+
+		CThostFtdcDepthMarketDataField* md = new CThostFtdcDepthMarketDataField();
+		_m_market_data.emplace(id, md);
+		tmp[row++] = new char[INSTRUMENT_LEN];
+		memcpy(tmp[row], id.c_str(), INSTRUMENT_LEN);
+	}
     if (status() != stat::logged) 
 		return error::ok;
-	_mdapi->SubscribeMarketData(_instruments, _request_id);
+
+	int ret = _mdapi->SubscribeMarketData(tmp, row);
+	switch (ret)
+	{
+	case 0: return error::ok;
+	case -1: return error::ctp_disconnected;
+	case -2: return error::ctp_too_much_unhandled_request;
+	case -3: return error::ctp_too_much_request;
+	default: return error::ctp_unknow_error;
+	}
+}
+
+error ctp::unsubscribe_market_data(const std::vector<std::string>& instruments)
+{
+	if (instruments.empty())
+		return error::ok;
+	
 	return error::ok;
 }
 
+error ctp::wait()
+{
+	// run thread, wait msg
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	return error::ok;
+}
+
+
+///////////////////////////// callback function ///////////////////////////////////////
 void ctp::OnFrontConnected()
 {
 	if (status_change(stat::connected) != stat::connected)
 		LOG_ERROR("ctp connected stat change fail");
 	else
 		LOG_INFO("ctp connected");
-
-	login();
 }
 
 void ctp::OnFrontDisconnected(int nReason)
@@ -152,7 +207,6 @@ void ctp::OnRspUserLogin(
 		return;
 	}
 
-	subscribe();
 	LOG_INFO("login success");
 }
     

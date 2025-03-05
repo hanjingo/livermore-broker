@@ -5,12 +5,7 @@
 #include <mutex>
 #include <unordered_map>
 
-#include <libcpp/log/logger.hpp>
-#include <libcpp/os/application.hpp>
 #include <libcpp/os/process.hpp>
-#include <libcpp/types/singleton.hpp>
-#include <libcpp/sync/defer.hpp>
-#include <libcpp/util/string_util.hpp>
 
 #include "version.h"
 #include "error.h"
@@ -37,6 +32,7 @@ public:
     std::string& tag();
     err_t run(const bool single = true);
     bool is_running();
+    bool is_starting();
     
 private:
     std::string _tag;

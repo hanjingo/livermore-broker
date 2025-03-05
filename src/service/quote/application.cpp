@@ -1,5 +1,8 @@
 #include "application.h"
 
+#include <libcpp/io/filepath.hpp>
+#include <libcpp/os/env.h>
+
 namespace quote
 {
 
@@ -32,32 +35,60 @@ err_t application::init()
     LOG_INFO("livermore-quote compile time {}", COMPILE_TIME);
     LOG_INFO("livermore-quote email {}", "hehehunanchina@live.com");
 
-    // // mkdir ctp file dir
-    // if (!libcpp::file_path::make_dir(conf..ctp_flow_md_path))
-    // {
-    //     LOG_ERROR("make flow_md_path={0} fail", conf..ctp_flow_md_path);
-    //     return error::ctp_create_flow_md_path_fail;
-    // }
+    // mkdir ctp file dir
+    if (!libcpp::file_path::is_exist(conf.ctp_flow_md_path) && 
+            !libcpp::file_path::make_dir(conf.ctp_flow_md_path))
+    {
+        LOG_ERROR("make flow_md_path={0} fail", conf.ctp_flow_md_path);
+        return error::ctp_create_flow_md_path_fail;
+    }
 
     return error::ok;
 }
 
 err_t application::run()
 {
-    if (_ctp == nullptr)
-        return error::ctp_null;
-
-    _ctp->subscribe(conf..ctp_instruments);
-
-    _ctp->connect(conf..ctp_port, 
-                  conf..ctp_ip.c_str(), 
-                  conf..ctp_flow_md_path.c_str(),
-                  conf..ctp_using_udp,
-                  conf..ctp_multicast);
-
+    LOG_DEBUG("quote application::run() enter");
     while (true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        if (ctp_obj.status() < ctp::stat::connected)
+        {
+            auto err = ctp_obj.connect(conf.ctp_port, 
+                                    conf.ctp_ip.c_str(), 
+                                    conf.ctp_flow_md_path.c_str(),
+                                    conf.ctp_using_udp,
+                                    conf.ctp_multicast);
+            if (err != error::ok) 
+            {
+                LOG_ERROR("ctp connect fail with err code={}", err);
+                continue;
+            }
+            LOG_INFO("ctp connect succ");
+        }
+
+        if (ctp_obj.status() > ctp::stat::connecting && ctp_obj.status() < ctp::stat::logged)
+        {
+            auto err = ctp_obj.login();
+            if (err != error::ok)
+            {
+                LOG_ERROR("ctp login fail with err code={}", err);
+                continue;
+            }
+            LOG_INFO("ctp login succ");
+        }
+
+        if (ctp_obj.status() > ctp::stat::logged)
+        {
+            auto err = ctp_obj.subscribe_market_data(conf.ctp_instruments);
+            if (err != error::ok)
+            {
+                LOG_ERROR("ctp subscribe fail with err code={}", err);
+                continue;
+            }
+        }
+
+        ctp_obj.wait();
     }
 
     return error::ok;

@@ -1,10 +1,6 @@
 #ifndef SERVICE_H
 #define SERVICE_H
 
-#include <thread>
-#include <libcpp/os/dll.h>
-#include <libcpp/sync/coroutine.hpp>
-
 #include "common/error_base.h"
 
 namespace livermore

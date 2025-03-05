@@ -2,13 +2,10 @@
 #define CONFIG_BASE_H
 
 #include <string>
-#include <chrono>
 #include <libcpp/log/logger.hpp>
-#include <libcpp/encoding/ini.hpp>
-#include <libcpp/io/file.hpp>
-#include <libcpp/util/string_util.hpp>
 
 #include "error_base.h"
+#include "config_base.h"
 
 namespace common
 {
@@ -25,7 +22,7 @@ struct config_base
     std::string module;
 
     std::string log_path;
-    FSIZE log_size;
+    unsigned long long log_size;
     int log_file_num;
     bool log_rotate_on_open;
     libcpp::log_lvl log_min_lvl;
