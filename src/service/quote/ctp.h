@@ -4,7 +4,7 @@
 #include <thread>
 #include <atomic>
 #include <vector>
-#include <unordered_map>
+#include <unordered_set>
 
 #include <ctp-traderAPI/ThostFtdcMdApi.h>
 #include <ctp-traderAPI/ThostFtdcUserApiStruct.h>
@@ -43,12 +43,8 @@ public:
     inline int id_inc() { int old = _req_id.load(); return _req_id.compare_exchange_weak(old, old + 1) ? old : old + 1; }
     inline void reset() { _stat.store(stat::disconnected); _req_id.store(0); }
 
-    error connect(const int port, 
-        const char* ip, 
-        const char* psz_flow_path = "", 
-        const bool is_using_udp = false, 
-        const bool is_multicast = false,
-        unsigned int timeout_ms = 3000);
+    error init(const char* psz_flow_path, const bool is_using_udp = false, const bool is_multicast = false);
+    error connect(const std::vector<std::string>& addrs, unsigned int timeout_ms = 3000);
     error login(unsigned int retry_times = 1, unsigned int retry_interval_ms = 1000);
     error logout();
     error subscribe_market_data(const std::vector<std::string>& instruments = {});
@@ -95,10 +91,9 @@ private:
     CThostFtdcMdApi* _mdapi;
     std::atomic<ctp::stat> _stat;
 
-    std::unordered_map<std::string, CThostFtdcDepthMarketDataField*> _m_market_data;
+    std::unordered_set<std::string> _md_topics;
 
     std::atomic<int> _req_id;
-    int _login_retry_times = 0;
 };
 
 }

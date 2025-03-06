@@ -33,7 +33,6 @@ err_t application::init()
         MANAGE_PATCH_VERSION);
     LOG_INFO("livermore-manage compile time {}", COMPILE_TIME);
     LOG_INFO("livermore-manage email {}", "hehehunanchina@live.com");
-
     return error::ok;
 }
 

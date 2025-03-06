@@ -43,6 +43,24 @@ err_t application::init()
         return error::ctp_create_flow_md_path_fail;
     }
 
+    // init ctp obj
+    if (conf.ctp_enable)
+    {
+        auto ctp_obj = new ctp();
+        err = ctp_obj->init(conf.ctp_flow_md_path.c_str(), conf.ctp_using_udp, conf.ctp_multicast);
+        if (err != error::ok)
+            return err;
+    }
+
+    // init xtp obj
+    if (conf.xtp_enable)
+    {
+        auto xtp_obj = new xtp();
+        err = xtp_obj->init(conf.xtp_client_id, conf.xtp_filepath.c_str(), conf.xtp_sdk_log_lvl, conf.xtp_heatbeat_interval, conf.xtp_buf_size);
+        if (err != error::ok)
+            return err;
+    }
+
     return error::ok;
 }
 
@@ -52,45 +70,48 @@ err_t application::run()
     while (true)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        if (ctp_obj.status() < ctp::stat::connected)
+        if (ctp_obj != nullptr)
         {
-            auto err = ctp_obj.connect(conf.ctp_port, 
-                                    conf.ctp_ip.c_str(), 
-                                    conf.ctp_flow_md_path.c_str(),
-                                    conf.ctp_using_udp,
-                                    conf.ctp_multicast);
-            if (err != error::ok) 
+            if (ctp_obj->status() < ctp::stat::connected)
             {
-                LOG_ERROR("ctp connect fail with err code={}", err);
-                continue;
+                auto err = ctp_obj->connect(conf.ctp_addrs);
+                if (err != error::ok) 
+                {
+                    LOG_ERROR("ctp connect fail with err code={}", common::err_to_hex(err));
+                    continue;
+                }
+                LOG_INFO("ctp connect succ");
             }
-            LOG_INFO("ctp connect succ");
+
+            if (ctp_obj->status() > ctp::stat::connecting && ctp_obj->status() < ctp::stat::logged)
+            {
+                auto err = ctp_obj->login();
+                if (err != error::ok)
+                {
+                    LOG_ERROR("ctp login fail with err code={}", common::err_to_hex(err));
+                    continue;
+                }
+                LOG_INFO("ctp login succ");
+            }
+
+            if (ctp_obj->status() > ctp::stat::logged)
+            {
+                auto err = ctp_obj->subscribe_market_data(conf.ctp_instruments);
+                if (err != error::ok)
+                {
+                    LOG_ERROR("ctp subscribe fail with err code={}", common::err_to_hex(err));
+                    continue;
+                }
+            }
+
+            ctp_obj->wait();
         }
 
-        if (ctp_obj.status() > ctp::stat::connecting && ctp_obj.status() < ctp::stat::logged)
+        if (xtp_obj != nullptr)
         {
-            auto err = ctp_obj.login();
-            if (err != error::ok)
-            {
-                LOG_ERROR("ctp login fail with err code={}", err);
-                continue;
-            }
-            LOG_INFO("ctp login succ");
-        }
 
-        if (ctp_obj.status() > ctp::stat::logged)
-        {
-            auto err = ctp_obj.subscribe_market_data(conf.ctp_instruments);
-            if (err != error::ok)
-            {
-                LOG_ERROR("ctp subscribe fail with err code={}", err);
-                continue;
-            }
         }
-
-        ctp_obj.wait();
     }
-
     return error::ok;
 }
 

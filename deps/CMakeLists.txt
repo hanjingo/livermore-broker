@@ -85,37 +85,45 @@ if (NOT Boost_FOUND)
         INSTALL_COMMAND cd ${BOOST_ROOT} && ./b2 --with-filesystem --with-coroutine --with-program_options install)
 endif()
 
+if (UNIX)
+    set(CTP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp-traderAPI/v3.7.3_20240910_api_traderapi_linux64_se)
+    file(GLOB all_ctp_src "${CTP_ROOT}/*.h")
+    set(CTP_CONF_CMD cp -p ${all_ctp_src} ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp-traderAPI/)
+    set(CTP_INSTALL_CMD 
+    cp -p ${CTP_ROOT}/soptthostmduserapi_se.so ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthostmduserapi_se.so && cp -p ${CTP_ROOT}/soptthosttraderapi_se.so ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthosttraderapi_se.so)
+else()
+    set(CTP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp-traderAPI/3.7.3_winapi_202409101516/20240910_traderapi64_windows_se)
+    file(GLOB all_ctp_src "${CTP_ROOT}/*.h")
+    set(CTP_CONF_CMD cp -p ${all_ctp_src} ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp-traderAPI/)
+    set(CTP_INSTALL_CMD "")
+endif()
 ExternalProject_Add(ctp-traderAPI
     URL http://www.sfit.com.cn/DocumentDown/api_3/5_2_3/traderAPI_3.7.3_20240910.zip
     DOWNLOAD_NAME traderAPI_3.7.3_20240910.zip
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}
-    CONFIGURE_COMMAND ""
+    CONFIGURE_COMMAND ${CTP_CONF_CMD}
     BUILD_COMMAND ""
-    INSTALL_COMMAND "")
+    INSTALL_COMMAND ${CTP_INSTALL_CMD})
+
 if (UNIX)
-    set(CTP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp-traderAPI/v3.7.3_20240910_api_traderapi_linux64_se)
-    file(GLOB all_ctp_so "${CTP_ROOT}/*.so")
-    file(COPY ${all_ctp_so} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib
-         FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
-    file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/lib/soptthostmduserapi_se.so ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthostmduserapi_se.so)
-    file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/lib/soptthosttraderapi_se.so ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthosttraderapi_se.so)
-
-    file(GLOB all_ctp_src "${CTP_ROOT}/*.h")
-    file(COPY ${all_ctp_src} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp-traderAPI)
-elseif (WIN32)
-    set(CTP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp-traderAPI/3.7.3_winapi_202409101516/20240910_traderapi64_windows_se)
-    file(GLOB all_ctp_dll "${CTP_ROOT}/*.dll")
-    file(COPY ${all_ctp_dll} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib
-         FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
-    file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/lib/soptthostmduserapi_se.dll ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthostmduserapi_se.dll)
-    file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/lib/soptthosttraderapi_se.dll ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthosttraderapi_se.dll)
-
-    file(GLOB all_ctp_lib "${CTP_ROOT}/*.lib")
-    file(COPY ${all_ctp_lib} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/lib
-         FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
-    file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/lib/soptthostmduserapi_se.lib ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthostmduserapi_se.lib)
-    file(RENAME ${CMAKE_CURRENT_SOURCE_DIR}/lib/soptthosttraderapi_se.lib ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthosttraderapi_se.lib)
-
-    file(GLOB all_ctp_src "${CTP_ROOT}/*.h")
-    file(COPY ${all_ctp_src} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp-traderAPI)
-endif()
+    set(XTP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/xtp/bin)
+    file(GLOB all_xtp_src "${XTP_ROOT}/include/*.h")
+    file(GLOB all_xtp_dll "${XTP_ROOT}/linux_glibc_2.17/*.so")
+    set(XTP_CONF_CMD mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/include/xtp)
+    set(XTP_BUILD_CMD cp -p ${all_xtp_src} ${CMAKE_CURRENT_SOURCE_DIR}/include/xtp/)
+    set(XTP_INSTALL_CMD cp -p ${all_xtp_dll} ${CMAKE_CURRENT_SOURCE_DIR}/lib/)
+else()
+    set(XTP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/xtp/bin)
+    file(GLOB all_xtp_src "${XTP_ROOT}/include/*.h")
+    file(GLOB all_xtp_lib "${XTP_ROOT}/win64/dll/*.lib")
+    file(GLOB all_xtp_dll "${XTP_ROOT}/win64/dll/*.dll")
+    set(XTP_CONF_CMD "")
+    set(XTP_INSTALL_CMD "")
+endif() 
+ExternalProject_Add(xtp
+    URL https://xtp.zts.com.cn/dl/sdk/XTP_API_20240611_2.2.42.1.zip
+    DOWNLOAD_NAME XTP_API_20240611_2.2.42.1.zip
+    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}
+    CONFIGURE_COMMAND ${XTP_CONF_CMD}
+    BUILD_COMMAND ${XTP_BUILD_CMD}
+    INSTALL_COMMAND ${XTP_INSTALL_CMD})

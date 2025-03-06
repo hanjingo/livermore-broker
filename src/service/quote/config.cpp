@@ -12,8 +12,7 @@ namespace quote
 void config::clear()
 {
     config_base::clear();
-    ctp_ip.clear();
-    ctp_port = 0;
+    ctp_addrs.clear();
     ctp_flow_md_path.clear();
     ctp_using_udp = false;
     ctp_multicast = false;
@@ -38,12 +37,28 @@ err_t config::load(const char* filepath)
     log_min_lvl = static_cast<libcpp::log_lvl>(cfg.get<int>("log_min_lvl", 1));
     crash_path = cfg.get<std::string>("crash_path");
 
-    ctp_ip = cfg.get<std::string>("ctp_ip");
-    ctp_port = cfg.get<int>("ctp_port");
+    ctp_enable = cfg.get<bool>("ctp_enable");
+    ctp_addrs = libcpp::string_util::split(cfg.get<std::string>("ctp_addrs"), ",");
     ctp_flow_md_path = cfg.get<std::string>("ctp_flow_md_path");
     ctp_using_udp = cfg.get<bool>("ctp_using_udp");
     ctp_multicast = cfg.get<bool>("ctp_multicast");
     ctp_instruments = libcpp::string_util::split(cfg.get<std::string>("ctp_instruments"), ",");
+
+    ctp_enable = cfg.get<bool>("xtp_enable");
+    xtp_addrs=libcpp::string_util::split(cfg.get<std::string>("xtp_addrs"), ",");
+    xtp_username=cfg.get<std::string>("xtp_username");
+    xtp_passwd=cfg.get<std::string>("xtp_passwd");
+    xtp_using_udp=cfg.get<bool>("xtp_using_udp");
+    xtp_auto_save=cfg.get<bool>("xtp_auto_save");
+    xtp_client_id=cfg.get<int>("xtp_client_id");
+    xtp_account_count=cfg.get<int>("xtp_account_count");
+    xtp_account_key=cfg.get<std::string>("xtp_account_key");
+    xtp_resume_type=cfg.get<int>("xtp_resume_type");
+    xtp_filepath=cfg.get<std::string>("xtp_filepath");
+    xtp_ping_pong_test=cfg.get<bool>("xtp_ping_pong_test");
+    xtp_heatbeat_interval=cfg.get<int>("xtp_heatbeat_interval");
+    xtp_buf_size=cfg.get<int>("xtp_buf_size");
+    xtp_sdk_log_lvl=cfg.get<int>("xtp_sdk_log_lvl");
     
     return check();
 }
@@ -53,10 +68,8 @@ err_t config::check()
     auto err = config_base::check();
     if (err != error::ok)
         return err;
-    if (ctp_ip.empty())
-        return error::ctp_ip_empty;
-    if (ctp_port < 0 || ctp_port > 65535)
-        return ctp_port_invalid;
+    if (ctp_addrs.empty())
+        return error::ctp_addr_empty;
     if (ctp_flow_md_path.empty())
         return error::ctp_flow_md_path_empty;
 

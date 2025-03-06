@@ -1,3 +1,4 @@
+#include <iostream>
 #include <thread>
 #include <libcpp/os/dll.h>
 #include <libcpp/sync/coroutine.hpp>
@@ -44,7 +45,6 @@ err_t service::start(bool async)
         std::thread([&](){ _frun(); }).detach();
         return common::error::ok;
     }
-
     return static_cast<common::error>(_frun());
 }
 

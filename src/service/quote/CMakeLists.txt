@@ -42,6 +42,8 @@ aux_source_directory(${COMMON_SOURCE_DIR} COMM_SRC)
 find_library(CTP_MDAPI soptthostmduserapi_se PATH ${DEPS_DIR}/lib)
 find_library(CTP_TRADER soptthosttraderapi_se PATH ${DEPS_DIR}/lib)
 
+find_library(XTP_QUOTE xtpquoteapi PATH ${DEPS_DIR}/lib)
+
 if (BUILD_SHARED)
     add_library(${QUOTE_SHARED_NAME} SHARED ${SRC} ${COMM_SRC})
 
@@ -50,6 +52,7 @@ if (BUILD_SHARED)
         ${Boost_LIBRARIES}
         ${CTP_MDAPI}
         ${CTP_TRADER}
+        ${XTP_QUOTE}
         breakpad_client
         spdlog::spdlog
         fmt::fmt
@@ -64,6 +67,7 @@ if (BUILD_STATIC)
         ${Boost_LIBRARIES}
         ${CTP_MDAPI}
         ${CTP_TRADER}
+        ${XTP_QUOTE}
         breakpad_client
         spdlog::spdlog
         fmt::fmt

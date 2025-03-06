@@ -5,12 +5,13 @@
 #define ERROR_MASK 0x3FF
 #endif
 
+#include <string>
+#include <libcpp/encoding/hex.hpp>
+
 using err_t = int;
 
 namespace common
 {
-
-static int real_error_code(const err_t err) { return ERROR_MASK & err; }
 
 enum error : err_t
 {
@@ -31,6 +32,13 @@ log_lvl_too_big,
 crash_path_permission_denied,
 
 common_error_end = 0x3FF,
+};
+
+static error real_error_code(const err_t err) { return error(ERROR_MASK & err); }
+static int err_to_int(const error err) { return static_cast<int>(err); }
+static std::string err_to_hex(const int err, bool upper_case = true) 
+{ 
+    return std::string("0x").append(libcpp::hex::to_str(err)); 
 };
 
 }

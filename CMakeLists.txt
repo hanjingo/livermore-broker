@@ -56,8 +56,8 @@ option(BUILD_STATIC "Build static object" OFF)
 option(BUILD_TESTS "Build test" OFF)
 option(BUILD_BENCHMARK "Build benchmark" OFF)
 
-add_subdirectory(deps)
-add_subdirectory(src)
+    add_subdirectory(deps)
+    add_subdirectory(src)
 
 if (BUILD_TESTS)
     add_subdirectory(tests)

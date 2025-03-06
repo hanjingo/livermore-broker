@@ -4,8 +4,10 @@
 #include "version.h"
 #include "error.h"
 #include "config.h"
-#include "ctp.h"
 #include "application_base.h"
+
+#include "ctp.h"
+#include "xtp.h"
 
 namespace quote
 {
@@ -24,7 +26,8 @@ public:
     err_t run() override;
 
     quote::config conf;
-    quote::ctp ctp_obj;
+    quote::ctp* ctp_obj;
+    quote::xtp* xtp_obj;
 };
 
 }
