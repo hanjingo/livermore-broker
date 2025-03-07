@@ -7,6 +7,8 @@
 
 #include "error.h"
 
+#define XTP_ADDR_N 5
+
 namespace quote
 {
 
@@ -15,9 +17,10 @@ class xtp : public XTP::API::QuoteSpi
 public:
     enum class stat : uint8_t
     {
-        logging_out,
+        logged_out,
         logging,
         logged,
+        logging_out,
     };
 
 public:
@@ -26,18 +29,22 @@ public:
 
 public:
     inline xtp::stat status() { return _stat.load(); }
+    xtp::stat status_change(const xtp::stat new_stat);
     error init(
         const uint8_t client_id, 
         const char *save_file_path, 
         const int log_level=XTP_LOG_LEVEL_DEBUG,
         uint32_t heatbeat_interval_sec = 3000, 
         uint32_t buff_size = 4096);
+
+    error register_addr(
+        const std::vector<std::string>& addrs = {}, 
+        bool using_udp = false,
+        const char* local_ip = NULL);
+
     error login(
-        const std::string& addr, 
         const char* user, 
         const char* password, 
-        bool using_udp = false, 
-        const char* local_ip = NULL, 
         uint32_t timeout_ms = 3000);
 
 public:
@@ -117,6 +124,9 @@ public:
 private:
     XTP::API::QuoteApi* _api = nullptr;
     std::atomic<xtp::stat> _stat;
+    std::pair<const char*, uint16_t> _addrs[XTP_ADDR_N];
+    XTP_PROTOCOL_TYPE _protocol = XTP_PROTOCOL_TCP;
+    std::string _local_ip;
 };
 
 }

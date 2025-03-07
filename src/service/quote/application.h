@@ -9,6 +9,8 @@
 #include "ctp.h"
 #include "xtp.h"
 
+#define XTP_NUM
+
 namespace quote
 {
 

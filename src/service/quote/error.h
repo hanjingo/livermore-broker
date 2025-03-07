@@ -30,7 +30,13 @@ ctp_disconnected,
 ctp_too_much_unhandled_request,
 ctp_too_much_request,
 
+xtp_unknow_error,
 xtp_null,
+xtp_addr_invalid,
+xtp_connect_serv_fail,
+xtp_connect_already_exist,
+xtp_input_error,
+xtp_login_fail,
 
 ctp_read_fail = 0x1001,
 ctp_write_fail,

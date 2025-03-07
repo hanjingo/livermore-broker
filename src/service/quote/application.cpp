@@ -109,7 +109,16 @@ err_t application::run()
 
         if (xtp_obj != nullptr)
         {
-
+            if (xtp_obj->status() == xtp::stat::logged_out)
+            {
+                auto err = xtp_obj->login(conf.xtp_username.c_str(), conf.xtp_passwd.c_str());
+                if (err != error::ok)
+                {
+                    LOG_ERROR("xtp login fail with err code={}", common::err_to_hex(err));
+                    continue;
+                }
+                LOG_INFO("xtp login succ");
+            }
         }
     }
     return error::ok;
