@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 #include "error.h"
 #include "version.h"
@@ -40,8 +41,9 @@ struct config : public common::config_base
     std::string xtp_filepath;
     bool xtp_ping_pong_test;
     int xtp_heatbeat_interval;
-    int xtp_buf_size;
+    int xtp_buf_size_mb;
     int xtp_sdk_log_lvl;
+    std::unordered_map<int, std::vector<std::string> > xtp_instruments;
 };
 
 }

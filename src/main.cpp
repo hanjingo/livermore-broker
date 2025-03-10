@@ -24,15 +24,18 @@ int main(int argc, char* argv[])
 
     err_t err = serv.load(dll.c_str());
     libcpp::throw_if_false(err == common::error::ok, 
-        std::string("load service ").append(dll).append(" fail, with error code=").append(std::to_string(static_cast<int>(err))).c_str());
+        std::string("load service ").append(dll).append(" fail, with error code=").append(
+            common::err_to_hex(err)).c_str());
 
     err = serv.init();
     libcpp::throw_if_false(err == common::error::ok, 
-        std::string("init service ").append(dll).append(" fail, with error code=").append(std::to_string(static_cast<int>(err))).c_str());
+        std::string("init service ").append(dll).append(" fail, with error code=").append(
+            common::err_to_hex(err)).c_str());
 
     err = serv.start();
     libcpp::throw_if_false(err == common::error::ok, 
-        std::string("start service ").append(dll).append(" fail, with error code=").append(std::to_string(static_cast<int>(err))).c_str());
+        std::string("start service ").append(dll).append(" fail, with error code=").append(
+            common::err_to_hex(err)).c_str());
 
     return 0;
 }

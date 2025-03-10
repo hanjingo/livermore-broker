@@ -44,7 +44,7 @@ err_t config::load(const char* filepath)
     ctp_multicast = cfg.get<bool>("ctp_multicast");
     ctp_instruments = libcpp::string_util::split(cfg.get<std::string>("ctp_instruments"), ",");
 
-    ctp_enable = cfg.get<bool>("xtp_enable");
+    xtp_enable = cfg.get<bool>("xtp_enable");
     xtp_addrs=libcpp::string_util::split(cfg.get<std::string>("xtp_addrs"), ",");
     xtp_username=cfg.get<std::string>("xtp_username");
     xtp_passwd=cfg.get<std::string>("xtp_passwd");
@@ -57,8 +57,19 @@ err_t config::load(const char* filepath)
     xtp_filepath=cfg.get<std::string>("xtp_filepath");
     xtp_ping_pong_test=cfg.get<bool>("xtp_ping_pong_test");
     xtp_heatbeat_interval=cfg.get<int>("xtp_heatbeat_interval");
-    xtp_buf_size=cfg.get<int>("xtp_buf_size");
+    xtp_buf_size_mb=cfg.get<int>("xtp_buf_size_mb");
     xtp_sdk_log_lvl=cfg.get<int>("xtp_sdk_log_lvl");
+    auto vec =libcpp::string_util::split(cfg.get<std::string>("xtp_instruments"), ",");
+    for (auto e : vec)
+    {
+        std::vector<std::string> v_elem = libcpp::string_util::split(e, ":");
+        if (v_elem.size() < 2)
+            continue;
+        if (v_elem[0] == "SH") { xtp_instruments[1].emplace_back(v_elem[1]); }
+        else if (v_elem[0] == "SZ") { xtp_instruments[2].emplace_back(v_elem[1]); }
+        else if (v_elem[0] == "NQ") { xtp_instruments[3].emplace_back(v_elem[1]); }
+        else{}
+    }
     
     return check();
 }

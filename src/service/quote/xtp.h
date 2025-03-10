@@ -3,6 +3,7 @@
 
 #include <atomic>
 #include <vector>
+#include <unordered_map>
 #include <xtp/xtp_quote_api.h>
 
 #include "error.h"
@@ -25,7 +26,7 @@ public:
 
 public:
     xtp() {}
-    ~xtp() {}
+    ~xtp() { if(_api != nullptr) {_api->Release();} }
 
 public:
     inline xtp::stat status() { return _stat.load(); }
@@ -42,10 +43,12 @@ public:
         bool using_udp = false,
         const char* local_ip = NULL);
 
-    error login(
-        const char* user, 
-        const char* password, 
-        uint32_t timeout_ms = 3000);
+    error login(const char* user, const char* password, uint32_t timeout_ms = 3000);
+    error logout();
+
+    error subscribe_market_data(std::unordered_map<int, std::vector<std::string> >& instruments);
+    error unsubscribe_market_data(std::unordered_map<int, std::vector<std::string> >& instruments);
+    error wait();
 
 public:
     virtual void OnDisconnected(int reason) override;
@@ -124,9 +127,10 @@ public:
 private:
     XTP::API::QuoteApi* _api = nullptr;
     std::atomic<xtp::stat> _stat;
-    std::pair<const char*, uint16_t> _addrs[XTP_ADDR_N];
+    std::pair<std::string, uint16_t> _addrs[XTP_ADDR_N];
     XTP_PROTOCOL_TYPE _protocol = XTP_PROTOCOL_TCP;
     std::string _local_ip;
+    std::atomic<int> _req_id;
 };
 
 }

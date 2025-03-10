@@ -1,5 +1,10 @@
 #include "xtp.h"
 
+#include <cstring>
+
+#include <libcpp/log/logger.hpp>
+#include <libcpp/util/string_util.hpp>
+
 namespace quote
 {
 
@@ -24,8 +29,6 @@ xtp::stat xtp::status_change(const stat new_stat)
 			break;
 		}
         case stat::logged_out: { 
-			if (old_stat != stat::logging_out)
-				return old_stat;
 			break;
 		}
 		default: return old_stat;
@@ -39,21 +42,31 @@ error xtp::init(
     const char *save_file_path, 
     const int log_level,
     uint32_t heatbeat_interval_sec, 
-    uint32_t buff_size)
+    uint32_t buff_size_mb)
 {
-    _api = XTP::API::QuoteApi::CreateQuoteApi(client_id, save_file_path, XTP_LOG_LEVEL_DEBUG);
+    LOG_DEBUG("xpt::init enter with client_id={0}, save_file_path={1}, log_level={2}, heatbeat_interval_sec={3}, buff_size_mb={4}", 
+        client_id, save_file_path, log_level, heatbeat_interval_sec, buff_size_mb);
+
+    if (status_change(stat::logged_out) != stat::logged_out)
+        return error::xtp_current_stat_not_allowd_init;
+
+    _api = XTP::API::QuoteApi::CreateQuoteApi(client_id, save_file_path, (XTP_LOG_LEVEL)(log_level));
     if (_api == nullptr)
         return error::xtp_null;
         
+    _api->SetHeartBeatInterval(heatbeat_interval_sec);
+	_api->SetUDPBufferSize(buff_size_mb);
     _api->RegisterSpi(this);
     return error::ok;
 }
 
 error xtp::register_addr(
-    const std::vector<std::string>& addrs = {}, 
-    bool using_udp = false,
-    const char* local_ip = NULL)
+    const std::vector<std::string>& addrs, 
+    bool using_udp,
+    const char* local_ip)
 {
+    LOG_DEBUG("xtp::register_addr enter with addrs.size()={0}, using_udp={1}", 
+        addrs.size(), using_udp);
     if (addrs.empty())
 		return error::xtp_addr_empty;
 
@@ -63,41 +76,126 @@ error xtp::register_addr(
         if (tmp.size() < 2)
             return error::xtp_addr_invalid;
 
-        _addrs[i] = std::pair<const char*, uint16_t>(tmp[0].c_str(), std::stoi(tmp[1]));
+        _addrs[i] = std::make_pair<std::string, uint16_t>(
+            std::move(tmp[0]), std::move(std::stoi(tmp[1])));
     }
 
     _protocol = (using_udp) ? XTP_PROTOCOL_UDP : XTP_PROTOCOL_TCP;
-    _local_ip = std::string(local_ip);
+    _local_ip = (local_ip == NULL) ? std::string() : std::string(local_ip);
+    return error::ok;
 }
 
-error xtp::login(
-    const char* user, 
-    const char* password, 
-    uint32_t timeout_ms)
+error xtp::login(const char* user, const char* password, uint32_t timeout_ms)
 {
+    LOG_DEBUG("xtp::login enter");
     if (status_change(stat::logging) != stat::logging)
 		return error::xtp_current_status_not_allowed_login;
 
     auto err = error::ok;
-    for (int i = 0; i < XTP_ADDR_N; ++i)
+    int i = 0;
+    for (; i < XTP_ADDR_N; ++i)
     {
-        auto ret = _api->Login(
-            _addrs[i].first, _addrs[i].second, user, password, _protocol, _local_ip.c_str());
+        if (_addrs[i].first.empty())
+            continue;
+
+        auto ret = _api->Login(_addrs[i].first.c_str(), _addrs[i].second, user, password, _protocol, 
+            (_local_ip.empty() ? NULL : _local_ip.c_str()));
         
         switch (ret)
         {
-            case 0: err = error:ok; break;
-            case -1: err = error::xtp_connect_serv_fail; break;
-            case -2: err = error::xtp_connect_already_exist; break;
-            case -3: err = error::xtp_input_error; break;
-            default: err = xtp_unknow_error; break;
+            case 0:  {err = error::ok; break;}
+            case -1: {err = error::xtp_connect_serv_fail; break;}
+            case -2: {err = error::xtp_connect_already_exist; break;}
+            case -3: {err = error::xtp_input_error; break;}
+            default: {err = error::xtp_unknow_error; break;}
         }
 
+        LOG_DEBUG("xtp login with ip={0}, port={1}, err={2}", 
+            _addrs[i].first, _addrs[i].second, quote::err_what(err));
         if (err == error::ok)
             break;
     }
 
     return (i == XTP_ADDR_N) ? error::xtp_login_fail : error::ok;
+}
+
+error xtp::logout()
+{
+    if (status_change(stat::logging_out) != stat::logging_out)
+        return error::xtp_current_status_not_allowed_logging_out;
+
+    int ret = _api->Logout();
+    if (ret != 0)
+        return error::xtp_logout_fail;
+
+    return error::ok;
+}
+
+error xtp::subscribe_market_data(std::unordered_map<int, std::vector<std::string> >& instruments)
+{
+    std::vector<std::string> topics;
+    for (int i = 1; i < 4; i++)
+    {
+        topics = instruments[i];
+        if (topics.empty())
+            continue;
+
+        char* *buf = new char*[topics.size()];
+        for (int i = 0; i < topics.size(); i++)
+        {
+            strcpy(buf[i], topics[i].c_str());
+        }
+        int ret = _api->SubscribeMarketData(buf, topics.size(), (XTP_EXCHANGE_TYPE)(i));
+
+        for (int j = 0; j < topics.size(); j++) {
+            delete[] buf[j];
+            buf[j] = NULL;
+        }
+        delete[] buf;
+        buf = NULL;
+
+        if (ret != 0)
+            return error::xtp_subscribe_fail;
+    }
+
+    return error::ok;
+}
+
+error xtp::unsubscribe_market_data(std::unordered_map<int, std::vector<std::string> >& instruments)
+{
+    std::vector<std::string> topics;
+    for (int i = 1; i < 4; i++)
+    {
+        topics = instruments[i];
+        if (topics.empty())
+            continue;
+
+        char* *buf = new char*[topics.size()];
+        for (int i = 0; i < topics.size(); i++)
+        {
+            strcpy(buf[i], topics[i].c_str());
+        }
+        int ret = _api->UnSubscribeMarketData(buf, topics.size(), (XTP_EXCHANGE_TYPE)(i));
+
+        for (int j = 0; j < topics.size(); j++) {
+            delete[] buf[j];
+            buf[j] = NULL;
+        }
+        delete[] buf;
+        buf = NULL;
+
+        if (ret != 0)
+            return error::xtp_unsubscribe_fail;
+    }
+
+    return error::ok;
+}
+
+error xtp::wait()
+{
+	// run thread, wait msg
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	return error::ok;
 }
 
 /////////////////////////////////// callback function /////////////////////////////////////////
@@ -110,27 +208,28 @@ void xtp::OnDisconnected(int reason)
 		return;
 	}
 	
-	LOG_INFO("xtp disconnected with reason={}", common::err_to_hex(reason));
+	LOG_DEBUG("xtp disconnected with reason={}", common::err_to_hex(reason));
 }
 
 void xtp::OnError(XTPRI *error_info)
 {
-    
+    LOG_ERROR("recv xtp error with error_id={0}, error_msg={1}", 
+        common::err_to_hex(error_info->error_id), error_info->error_msg);
 }
 
 void xtp::OnTickByTickLossRange(int begin_seq, int end_seq)
 {
-    
+    LOG_DEBUG("OnTickByTickLossRange");
 }
 
 void xtp::OnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last)
 {
-    
+    LOG_DEBUG("OnSubMarketData");
 }
 
 void xtp::OnUnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last)
 {
-    
+    LOG_DEBUG("OnUnSubMarketData");
 }
 
 void xtp::OnDepthMarketData(
@@ -142,142 +241,142 @@ void xtp::OnDepthMarketData(
         int32_t ask1_count, 
         int32_t max_ask1_count)
 {
-    
+    LOG_DEBUG("OnDepthMarketData");
 }
 
 void xtp::OnETFIOPVData(IOPV *iopv)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnSubOrderBook(XTPST *ticker, XTPRI *error_info, bool is_last)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnUnSubOrderBook(XTPST *ticker, XTPRI *error_info, bool is_last)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnOrderBook(XTPOB *order_book)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnSubTickByTick(XTPST *ticker, XTPRI *error_info, bool is_last)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnUnSubTickByTick(XTPST *ticker, XTPRI *error_info, bool is_last)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnTickByTick(XTPTBT *tbt_data)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnSubscribeAllMarketData(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnUnSubscribeAllMarketData(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnSubscribeAllOrderBook(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnUnSubscribeAllOrderBook(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnSubscribeAllTickByTick(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnUnSubscribeAllTickByTick(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnQueryAllTickers(XTPQSI* ticker_info, XTPRI *error_info, bool is_last)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnQueryTickersPriceInfo(XTPTPI* ticker_info, XTPRI *error_info, bool is_last)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnSubscribeAllOptionMarketData(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnUnSubscribeAllOptionMarketData(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnSubscribeAllOptionOrderBook(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnUnSubscribeAllOptionOrderBook(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnSubscribeAllOptionTickByTick(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnUnSubscribeAllOptionTickByTick(XTP_EXCHANGE_TYPE exchange_id, XTPRI *error_info)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnQueryAllTickersFullInfo(XTPQFI* ticker_info, XTPRI *error_info, bool is_last)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnQueryAllNQTickersFullInfo(XTPNQFI* ticker_info, XTPRI *error_info, bool is_last)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnRebuildQuoteServerDisconnected(int reason)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnRequestRebuildQuote(XTPQuoteRebuildResultRsp* rebuild_result)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnRebuildTickByTick(XTPTBT *tbt_data)
 {
-    
+    LOG_DEBUG("");
 }
 
 void xtp::OnRebuildMarketData(XTPMD *md_data)
 {
-    
+    LOG_DEBUG("");
 }
 
 }
