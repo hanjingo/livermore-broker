@@ -2,7 +2,7 @@
 #define ERROR_BASE_H
 
 #ifndef ERROR_MASK
-#define ERROR_MASK 0x3FF
+#define ERROR_MASK 0x0
 #endif
 
 #include <string>
@@ -11,17 +11,12 @@
 
 using err_t = int;
 
-#define __err_cat(a, b) a##b
-#define _err_cat(a, b) __err_cat(a, b)
-#define ERR_DESC(name, desc) static const char* _err_cat(err_, name) = desc;
-#define ERR_WHAT(name) _err_cat(err_, name)
-
 namespace common
 {
 
 enum error : err_t
 {
-ok = 0x0,
+ok = ERROR_MASK & 0x0,
 fail, 
 dll_open_fail,
 fn_info_not_found,

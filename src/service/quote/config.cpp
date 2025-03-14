@@ -77,14 +77,14 @@ err_t config::load(const char* filepath)
 err_t config::check()
 {
     auto err = config_base::check();
-    if (err != error::ok)
+    if (err != common::error::ok)
         return err;
     if (ctp_addrs.empty())
         return error::ctp_addr_empty;
     if (ctp_flow_md_path.empty())
         return error::ctp_flow_md_path_empty;
 
-    return error::ok;
+    return common::error::ok;
 }
 
 }

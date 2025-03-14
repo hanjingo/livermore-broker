@@ -55,7 +55,7 @@ error ctp::init(const char* psz_flow_path, const bool is_using_udp, const bool i
 		return error::ctp_create_mdapi_fail;
 
 	_mdapi->RegisterSpi(this);
-	return error::ok;
+	return common::error::ok;
 }
 
 error ctp::connect(const std::vector<std::string>& addrs, unsigned int timeout_ms)
@@ -73,13 +73,13 @@ error ctp::connect(const std::vector<std::string>& addrs, unsigned int timeout_m
 	if (timeout_ms < 0)
 	{
 		_mdapi->Join();
-		return error::ok;
+		return common::error::ok;
 	}
 
 	while (timeout_ms > 0)
 	{
 		if (status() == stat::connected)
-			return error::ok;
+			return common::error::ok;
 
 		timeout_ms--;
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -105,7 +105,7 @@ error ctp::login(unsigned int retry_times, unsigned int retry_interval_ms)
 		return error::ctp_request_user_login_fail;
 	}
 
-	return error::ok;
+	return common::error::ok;
 }
 
 error ctp::logout()
@@ -113,7 +113,7 @@ error ctp::logout()
 	if (status_change(stat::logging_out) != stat::logging_out)
 		return error::ctp_current_status_not_allowed_logging_out;
 
-	return error::ok;
+	return common::error::ok;
 }
 
 error ctp::subscribe_market_data(const std::vector<std::string>& instruments)
@@ -137,7 +137,7 @@ error ctp::subscribe_market_data(const std::vector<std::string>& instruments)
 
 	switch (ret)
 	{
-	case 0: return error::ok;
+	case 0: return common::error::ok;
 	case -1: return error::ctp_disconnected;
 	case -2: return error::ctp_too_much_unhandled_request;
 	case -3: return error::ctp_too_much_request;
@@ -162,7 +162,7 @@ error ctp::unsubscribe_market_data(const std::vector<std::string>& instruments)
 	int ret = _mdapi->UnSubscribeMarketData(topics, row);
 	switch (ret)
 	{
-	case 0: return error::ok;
+	case 0: return common::error::ok;
 	case -1: return error::ctp_disconnected;
 	case -2: return error::ctp_too_much_unhandled_request;
 	case -3: return error::ctp_too_much_request;
@@ -174,7 +174,7 @@ error ctp::wait()
 {
 	// run thread, wait msg
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	return error::ok;
+	return common::error::ok;
 }
 
 

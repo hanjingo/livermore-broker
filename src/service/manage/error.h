@@ -1,23 +1,23 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#define ERROR_MASK 0x3FFF
+#define ERROR_MASK 0x100
 
 #include "error_base.h"
 
 namespace manage
 {
 
-// [0x1000, 0x3FFF]
 enum error : err_t
 {
 ok = common::ok,
+err_start = common::common_error_end,
 
-serv_scan_too_busy = 0x1000,
+serv_scan_too_busy,
 serv_scan_too_slow,
 serv_proc_too_much,
 
-can_not_add_watch_list_twice = 0x2000,
+can_not_add_watch_list_twice,
 proc_run_fail,
 proc_already_running,
 proc_file_path_empty,

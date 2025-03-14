@@ -1,18 +1,18 @@
 #ifndef ERROR_H
 #define ERROR_H
 
+#define ERROR_MASK 0x200
+
 #include "error_base.h"
 
 namespace quote
 {
 
-// [1024, 4095]
 enum error : err_t
 {
+err_start = common::common_error_end,
 
-ok = common::ok,
-
-quote_err_start = 0x400,
+quote_err_start,
 ctp_unknow_error,
 ctp_addr_empty,
 ctp_addr_invalid,
@@ -29,8 +29,13 @@ ctp_connect_timeout,
 ctp_disconnected,
 ctp_too_much_unhandled_request,
 ctp_too_much_request,
+ctp_read_fail,
+ctp_write_fail,
+ctp_heartbeat_timeout,
+ctp_heartbeat_fail,
+ctp_recv_invalid_msg,
 
-xtp_unknow_error, // 0x411
+xtp_unknow_error,
 xtp_null,
 xtp_current_stat_not_allowd_init,
 xtp_addr_empty,
@@ -44,14 +49,6 @@ xtp_current_status_not_allowed_logging_out,
 xtp_logout_fail,
 xtp_subscribe_fail,
 xtp_unsubscribe_fail,
-
-ctp_read_fail = 0x1001,
-ctp_write_fail,
-
-ctp_heartbeat_timeout = 0x2001,
-ctp_heartbeat_fail,
-ctp_recv_invalid_msg,
-error_end = 0x1FFF,
 };
 
 template<typename T>

@@ -1,4 +1,5 @@
 #include "export.h"
+#include "error.h"
 #include "application.h"
 
 void info()
@@ -8,15 +9,15 @@ void info()
 
 int init()
 {
-    return static_cast<int>(quote::application::instance().init());
+    return static_cast<int>((~ERROR_MASK) & quote::application::instance().init());
 }
 
 int run()
 {
-    return static_cast<int>(quote::application::instance().run());
+    return static_cast<int>((~ERROR_MASK) & quote::application::instance().run());
 }
 
 int stop()
 {
-    return static_cast<int>(quote::application::instance().stop());
+    return static_cast<int>((~ERROR_MASK) & quote::application::instance().stop());
 }
