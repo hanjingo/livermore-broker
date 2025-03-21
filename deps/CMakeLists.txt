@@ -14,7 +14,7 @@ if(NOT fmt_FOUND)
         URL https://github.com/fmtlib/fmt/releases/download/11.1.4/fmt-11.1.4.zip
         DOWNLOAD_NAME fmt_11_1_4.zip
         PREFIX ${CMAKE_CURRENT_SOURCE_DIR}
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR} -DFMT_TEST=OFF -DFMT_DOC=OFF)
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR} -DFMT_TEST=OFF -DFMT_DOC=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON)
 endif()
 
 pkg_check_modules(BREAKPAD breakpad-client)
@@ -42,6 +42,15 @@ if(NOT spdlog_FOUND)
         DOWNLOAD_NAME spdlog_1_11_0.zip
         PREFIX ${CMAKE_CURRENT_SOURCE_DIR}
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR} -DSPDLOG_BUILD_EXAMPLE=OFF -DSPDLOG_BUILD_PIC=ON)
+endif()
+
+find_package(httplib)
+if(NOT httplib_FOUND)
+    ExternalProject_Add(httplib
+        URL https://github.com/yhirose/cpp-httplib/archive/refs/tags/v0.20.0.zip
+        DOWNLOAD_NAME httplib_0_20_0.zip
+        PREFIX ${CMAKE_CURRENT_SOURCE_DIR}
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
 find_package(ZeroMQ)

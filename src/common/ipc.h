@@ -1,9 +1,8 @@
 #ifndef IPC_HPP
 #define IPC_HPP
 
-#include <boost/interprocess/mapped_region.hpp>
-#include <boost/interprocess/shared_memory_object.hpp>
-#include <boost/interprocess/managed_shared_memory.hpp>
+#include <libcpp/sync/shared_memory.hpp>
+#include <libcpp/sync/chan.hpp>
 
 namespace common
 {
@@ -11,18 +10,24 @@ namespace common
 class ipc
 {
 public:
-    ipc();
-    ~ipc();
+    ipc(const char* id, const std::size_t sz, const int flag = O_CREAT | O_RDWR) 
+        : _shm{libcpp::shared_memory(id, sz, flag, 0666)} 
+    {
+        if (_shm.map() == nullptr)
+            throw "create/open ipc fail";
+    }
+    ~ipc() {};
 
-    template<typename Container>
-    Container make(const char* id);
+    static ipc<T> make(const char* id);
 
-    template<typename Container>
-    void free(const char* id, Container container);
+    void read(char* buf, std::size_t sz);
 
-    void read();
+    void write(char* buf, std::size sz);
 
-    void write();
+private:
+    libcpp::chan<char*> _rch;
+    libcpp::chan<char*> _wch;
+    libcpp::shared_memory _shm;
 };
 
 }

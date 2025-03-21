@@ -10,7 +10,7 @@ namespace manage
 
 enum error : err_t
 {
-ok = common::ok,
+ok = common::error::ok,
 err_start = common::common_error_end,
 
 serv_scan_too_busy,

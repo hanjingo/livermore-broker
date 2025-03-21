@@ -49,6 +49,7 @@ err_t config::load(const char* filepath)
     xtp_username=cfg.get<std::string>("xtp_username");
     xtp_passwd=cfg.get<std::string>("xtp_passwd");
     xtp_using_udp=cfg.get<bool>("xtp_using_udp");
+    xtp_local_ip=cfg.get<std::string>("xtp_local_ip");
     xtp_auto_save=cfg.get<bool>("xtp_auto_save");
     xtp_client_id=cfg.get<int>("xtp_client_id");
     xtp_account_count=cfg.get<int>("xtp_account_count");
@@ -59,7 +60,7 @@ err_t config::load(const char* filepath)
     xtp_heatbeat_interval=cfg.get<int>("xtp_heatbeat_interval");
     xtp_buf_size_mb=cfg.get<int>("xtp_buf_size_mb");
     xtp_sdk_log_lvl=cfg.get<int>("xtp_sdk_log_lvl");
-    auto vec =libcpp::string_util::split(cfg.get<std::string>("xtp_instruments"), ",");
+    auto vec = libcpp::string_util::split(cfg.get<std::string>("xtp_instruments"), ",");
     for (auto e : vec)
     {
         std::vector<std::string> v_elem = libcpp::string_util::split(e, ":");
@@ -70,6 +71,9 @@ err_t config::load(const char* filepath)
         else if (v_elem[0] == "NQ") { xtp_instruments[3].emplace_back(v_elem[1]); }
         else{}
     }
+
+    tx_enable = cfg.get<bool>("tx_enable");
+    tx_instruments = libcpp::string_util::split(cfg.get<std::string>("tx_instruments"), ",");
     
     return check();
 }
@@ -77,14 +81,14 @@ err_t config::load(const char* filepath)
 err_t config::check()
 {
     auto err = config_base::check();
-    if (err != common::error::ok)
+    if (err != error::ok)
         return err;
     if (ctp_addrs.empty())
         return error::ctp_addr_empty;
     if (ctp_flow_md_path.empty())
         return error::ctp_flow_md_path_empty;
 
-    return common::error::ok;
+    return error::ok;
 }
 
 }

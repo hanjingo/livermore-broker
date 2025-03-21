@@ -10,6 +10,7 @@ namespace quote
 
 enum error : err_t
 {
+ok = common::error::ok,
 err_start = common::common_error_end,
 
 quote_err_start,
@@ -49,6 +50,8 @@ xtp_current_status_not_allowed_logging_out,
 xtp_logout_fail,
 xtp_subscribe_fail,
 xtp_unsubscribe_fail,
+
+tx_unknow_error,
 };
 
 template<typename T>
@@ -79,6 +82,11 @@ switch (err)
     case ctp_disconnected: return "ctp_disconnected";
     case ctp_too_much_unhandled_request: return "ctp_too_much_unhandled_request";
     case ctp_too_much_request: return "ctp_too_much_request";
+    case ctp_read_fail: return "ctp_read_fail";
+    case ctp_write_fail: return "ctp_write_fail";
+    case ctp_heartbeat_timeout: return "ctp_heartbeat_timeout";
+    case ctp_heartbeat_fail: return "ctp_heartbeat_fail";
+    case ctp_recv_invalid_msg: return "ctp_recv_invalid_msg";
 
     case xtp_unknow_error: return "xtp_unknow_error";
     case xtp_null: return "xtp_null";
@@ -95,13 +103,7 @@ switch (err)
     case xtp_subscribe_fail: return "xtp_subscribe_fail";
     case xtp_unsubscribe_fail: return "xtp_unsubscribe_fail";
 
-    case ctp_read_fail: return "ctp_read_fail";
-    case ctp_write_fail: return "ctp_write_fail";
-
-    case ctp_heartbeat_timeout: return "ctp_heartbeat_timeout";
-    case ctp_heartbeat_fail: return "ctp_heartbeat_fail";
-    case ctp_recv_invalid_msg: return "ctp_recv_invalid_msg";
-    case error_end: return "error_end";
+    case tx_unknow_error: return "tx_unknow_error";
 }
 }
 

@@ -33,6 +33,7 @@ struct config : public common::config_base
     std::string xtp_username;
     std::string xtp_passwd;
     bool xtp_using_udp;
+    std::string xtp_local_ip;
     bool xtp_auto_save;
     int xtp_client_id;
     int xtp_account_count;
@@ -44,6 +45,9 @@ struct config : public common::config_base
     int xtp_buf_size_mb;
     int xtp_sdk_log_lvl;
     std::unordered_map<int, std::vector<std::string> > xtp_instruments;
+
+    bool tx_enable = false;
+    std::vector<std::string> tx_instruments;
 };
 
 }

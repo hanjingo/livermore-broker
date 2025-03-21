@@ -55,20 +55,21 @@ error xtp::init(
     _api = XTP::API::QuoteApi::CreateQuoteApi(client_id, save_file_path, (XTP_LOG_LEVEL)(log_level));
     if (_api == nullptr)
         return error::xtp_null;
-        
+    
+    _api->Logout(); // whatever logout first;
     _api->SetHeartBeatInterval(heatbeat_interval_sec);
 	_api->SetUDPBufferSize(buff_size_mb);
     _api->RegisterSpi(this);
-    return common::error::ok;
+    return error::ok;
 }
 
 error xtp::register_addr(
     const std::vector<std::string>& addrs, 
     bool using_udp,
-    const char* local_ip)
+    const std::string& local_ip)
 {
-    LOG_DEBUG("xtp::register_addr enter with addrs.size()={0}, using_udp={1}", 
-        addrs.size(), using_udp);
+    LOG_DEBUG("xtp::register_addr enter with addrs.size()={0}, using_udp={1}, local_ip={2}", 
+        addrs.size(), using_udp, local_ip);
     if (addrs.empty())
 		return error::xtp_addr_empty;
 
@@ -83,8 +84,8 @@ error xtp::register_addr(
     }
 
     _protocol = (using_udp) ? XTP_PROTOCOL_UDP : XTP_PROTOCOL_TCP;
-    _local_ip = (local_ip == NULL) ? std::string() : std::string(local_ip);
-    return common::error::ok;
+    _local_ip = local_ip;
+    return error::ok;
 }
 
 error xtp::login(const char* user, const char* password, uint32_t timeout_ms)
@@ -93,32 +94,33 @@ error xtp::login(const char* user, const char* password, uint32_t timeout_ms)
     if (status_change(stat::logging) != stat::logging)
 		return error::xtp_current_status_not_allowed_login;
 
-    auto err = common::error::ok;
+    auto err = error::ok;
     int i = 0;
     for (; i < XTP_ADDR_N; ++i)
     {
         if (_addrs[i].first.empty())
             continue;
 
-        auto ret = _api->Login(_addrs[i].first.c_str(), _addrs[i].second, user, password, _protocol, 
-            (_local_ip.empty() ? NULL : _local_ip.c_str()));
-        
+        auto ret = _api->Login(_addrs[i].first.c_str(), _addrs[i].second, user, password, _protocol, _local_ip.c_str());
         switch (ret)
         {
-            case 0:  {err = common::error::ok; break;}
+            case 0:  {err = error::ok; break;}
             case -1: {err = error::xtp_connect_serv_fail; break;}
             case -2: {err = error::xtp_connect_already_exist; break;}
             case -3: {err = error::xtp_input_error; break;}
             default: {err = error::xtp_unknow_error; break;}
         }
 
-        LOG_DEBUG("xtp login with ip={0}, port={1}, err={2}", 
-            _addrs[i].first, _addrs[i].second, quote::err_what(err));
-        if (err == common::error::ok)
+        LOG_DEBUG("xtp login with ip={}, port={}, user={}, password={}, _protocol={}, _local_ip={}", 
+            _addrs[i].first, _addrs[i].second, user, password, int(_protocol), _local_ip);
+        if (err == error::ok)
             break;
+
+        XTPRI* err = _api->GetApiLastError();
+        LOG_DEBUG("get login fail last error with error_id={0}, error_msg={1}", err->error_id, err->error_msg);
     }
 
-    return (i == XTP_ADDR_N) ? error::xtp_login_fail : common::error::ok;
+    return (i == XTP_ADDR_N) ? error::xtp_login_fail : error::ok;
 }
 
 error xtp::logout()
@@ -130,7 +132,7 @@ error xtp::logout()
     if (ret != 0)
         return error::xtp_logout_fail;
 
-    return common::error::ok;
+    return error::ok;
 }
 
 error xtp::subscribe_market_data(std::unordered_map<int, std::vector<std::string> >& instruments)
@@ -160,7 +162,7 @@ error xtp::subscribe_market_data(std::unordered_map<int, std::vector<std::string
             return error::xtp_subscribe_fail;
     }
 
-    return common::error::ok;
+    return error::ok;
 }
 
 error xtp::unsubscribe_market_data(std::unordered_map<int, std::vector<std::string> >& instruments)
@@ -190,14 +192,14 @@ error xtp::unsubscribe_market_data(std::unordered_map<int, std::vector<std::stri
             return error::xtp_unsubscribe_fail;
     }
 
-    return common::error::ok;
+    return error::ok;
 }
 
 error xtp::wait()
 {
 	// run thread, wait msg
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	return common::error::ok;
+	return error::ok;
 }
 
 /////////////////////////////////// callback function /////////////////////////////////////////
@@ -226,16 +228,16 @@ void xtp::OnTickByTickLossRange(int begin_seq, int end_seq)
 
 void xtp::OnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last)
 {
-    if (error_info != nullptr && error_info->err != 0)
-        LOG_ERROR("subscribe market data fail with error code={}", error_info->err);
+    if (error_info != nullptr && error_info->error_id != 0)
+        LOG_ERROR("subscribe market data fail with error code={}", error_info->error_id);
 
     LOG_DEBUG("OnSubMarketData");
 }
 
 void xtp::OnUnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last)
 {
-    if (error_info != nullptr && error_info->err != 0)
-        LOG_ERROR("unsubscribe market data fail with error code={}", error_info->err);
+    if (error_info != nullptr && error_info->error_id != 0)
+        LOG_ERROR("unsubscribe market data fail with error code={}", error_info->error_id);
 
     LOG_DEBUG("OnUnSubMarketData");
 }

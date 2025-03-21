@@ -8,6 +8,7 @@
 
 #include "ctp.h"
 #include "xtp.h"
+#include "tx.h"
 
 #define XTP_NUM
 
@@ -27,9 +28,10 @@ public:
     err_t init();
     err_t run() override;
 
-    quote::config conf;
-    quote::ctp* ctp_obj;
-    quote::xtp* xtp_obj;
+    quote::config       conf;
+    quote::ctp*         ctp_obj;
+    quote::xtp*         xtp_obj;
+    quote::tx*          tx_obj;
 };
 
 }

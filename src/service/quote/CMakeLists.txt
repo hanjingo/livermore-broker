@@ -27,6 +27,7 @@ pkg_check_modules(BREAKPAD REQUIRED breakpad-client)
 
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
+find_package(httplib REQUIRED)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${COMMON_SOURCE_DIR})

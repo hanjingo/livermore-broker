@@ -20,7 +20,7 @@ class proc
 public:
     proc(const std::string& tag) : _tag{tag} 
     {
-#if defined(WIN32)
+#if defined(_WIN32)
         _cmd = "livermore-broker.exe";
 #else
         _cmd = "./livermore-broker";

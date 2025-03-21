@@ -41,7 +41,7 @@ public:
     error register_addr(
         const std::vector<std::string>& addrs = {}, 
         bool using_udp = false,
-        const char* local_ip = NULL);
+        const std::string& local_ip = std::string());
 
     error login(const char* user, const char* password, uint32_t timeout_ms = 3000);
     error logout();
