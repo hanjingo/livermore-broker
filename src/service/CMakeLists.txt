@@ -6,3 +6,5 @@ add_subdirectory(quote)
 # add_subdirectory(sentinel)
 
 add_subdirectory(manage)
+
+# add_subdirectory(backtest)
