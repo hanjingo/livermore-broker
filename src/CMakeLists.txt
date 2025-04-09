@@ -6,6 +6,7 @@ set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../deps/lib/pkgconfig")
 set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../deps/lib/cmake")
 
 add_subdirectory(service)
+add_subdirectory(script)
 
 find_package(Boost COMPONENTS 
     program_options

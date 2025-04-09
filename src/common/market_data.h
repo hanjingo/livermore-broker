@@ -18,6 +18,7 @@ typedef double md_money_t;
 typedef double md_volumn_t;
 typedef char md_instrument_name_t[21];
 
+#pragma pack(push, 8)
 struct market_data
 {
     md_date_t trading_day;
@@ -65,6 +66,7 @@ struct market_data
     md_time_t action_time;
     md_millisec_t action_ms;
 };
+#pragma pack(pop)
 
 }
 

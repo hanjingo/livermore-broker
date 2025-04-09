@@ -1,5 +1,6 @@
 #include "export.h"
-#include <thread>
+#include "error.h"
+#include "application.h"
 
 void info()
 {
@@ -8,15 +9,15 @@ void info()
 
 int init()
 {
-    return 0;
+    return static_cast<int>((~ERROR_MASK) & broadcast::application::instance().init());
 }
 
 int run()
 {
-    while(true) { std::this_thread::sleep_for(std::chrono::milliseconds(500)); };
+    return static_cast<int>((~ERROR_MASK) & broadcast::application::instance().run());
 }
 
 int stop()
 {
-    return 0;
+    return static_cast<int>((~ERROR_MASK) & broadcast::application::instance().stop());
 }

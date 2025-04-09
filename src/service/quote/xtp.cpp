@@ -5,8 +5,6 @@
 #include <libcpp/log/logger.hpp>
 #include <libcpp/util/string_util.hpp>
 
-#include "ipc.h"
-
 namespace quote
 {
 

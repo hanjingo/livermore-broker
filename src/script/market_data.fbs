@@ -1,0 +1,52 @@
+namespace fbs;
+
+table market_data{
+    trading_day:string (id:0);
+    instrument_name:string (id:1);
+    instrument_id:string (id:2);
+    exchange_id:string (id:3);
+    last_price:float (id:4);
+    pre_close_price:float (id:5);
+    open_price:float (id:6);
+    pre_settlement_price:float (id:7);
+    highest_price:float (id:8);
+    lowest_price:float (id:9);
+    close_price:float (id:10);
+    settlement_price:float (id:11);
+    upper_limit_price:float (id:12);
+    lower_limit_price:float (id:13);
+    average_price:float (id:14);
+    bid_price1:float (id:15);
+    ask_price1:float (id:16);
+    bid_price2:float (id:17);
+    ask_price2:float (id:18);
+    bid_price3:float (id:19);
+    ask_price3:float (id:20);
+    bid_price4:float (id:21);
+    ask_price4:float (id:22);
+    bid_price5:float (id:23);
+    ask_price5:float (id:24);
+    bid_volumn1:float (id:25);
+    ask_volumn1:float (id:26);
+    bid_volumn2:float (id:27);
+    ask_volumn2:float (id:28);
+    bid_volumn3:float (id:29);
+    ask_volumn3:float (id:30);
+    bid_volumn4:float (id:31);
+    ask_volumn4:float (id:32);
+    bid_volumn5:float (id:33);
+    ask_volumn5:float (id:34);
+    volume:float (id:35);
+    pre_open_interest:float (id:36);
+    open_interest:float (id:37);
+    trading_volumn:float (id:38);
+    turnover:float (id:39);
+    action_time:string (id:40);
+    action_ms:int (id:41);
+}
+
+table md_ntf{
+    size:int (id:0);
+    data:[market_data] (id:1);
+}
+root_type market_data;

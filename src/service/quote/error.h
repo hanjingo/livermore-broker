@@ -58,9 +58,9 @@ template<typename T>
 static std::string err_what(const T err)
 {
 
-std::string ret = common::err_what(err);
-if (!ret.empty())
-    return ret;
+std::string str = common::err_what(err);
+if (!str.empty())
+    return str;
 
 switch (err)
 {

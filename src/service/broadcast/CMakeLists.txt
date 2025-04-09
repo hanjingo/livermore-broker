@@ -17,8 +17,19 @@ if (NOT BROADCAST_STATIC_NAME)
     set(BROADCAST_STATIC_NAME ${PROJECT_NAME}-static)
 endif()
 
+find_package(Boost REQUIRED  
+    filesystem 
+    context 
+    thread 
+    coroutine)
+
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(BREAKPAD REQUIRED breakpad-client)
+
+find_package(spdlog REQUIRED)
+find_package(fmt REQUIRED)
+find_package(nlohmann_json REQUIRED)
+find_package(TBB REQUIRED)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${COMMON_SOURCE_DIR})
@@ -36,7 +47,12 @@ if (BUILD_SHARED)
 
     target_link_libraries(${BROADCAST_SHARED_NAME} 
         ${CMAKE_DL_LIBS}
+        ${Boost_LIBRARIES}
+        spdlog::spdlog
         breakpad_client
+        fmt::fmt
+        nlohmann_json::nlohmann_json
+        TBB::tbb
         pthread)
 endif()
 
@@ -45,7 +61,12 @@ if (BUILD_STATIC)
 
     target_link_libraries(${BROADCAST_STATIC_NAME} 
         ${CMAKE_DL_LIBS}
+        ${Boost_LIBRARIES}
+        spdlog::spdlog
         breakpad_client
+        fmt::fmt
+        nlohmann_json::nlohmann_json
+        TBB::tbb
         pthread)
 endif()
 
