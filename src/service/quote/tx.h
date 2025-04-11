@@ -6,7 +6,7 @@
 #include <functional>
 
 #include "error.h"
-#include "market_data_shm.h"
+#include "market_data_util.h"
 
 namespace quote
 {

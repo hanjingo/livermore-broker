@@ -1,4 +1,4 @@
-namespace fbs;
+namespace broadcast;
 
 table market_data{
     trading_day:string (id:0);
@@ -46,7 +46,6 @@ table market_data{
 }
 
 table md_ntf{
-    size:int (id:0);
-    data:[market_data] (id:1);
+    data:[market_data] (id:0);
 }
-root_type market_data;
+root_type md_ntf;

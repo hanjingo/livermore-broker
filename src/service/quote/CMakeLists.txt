@@ -57,6 +57,7 @@ if (BUILD_SHARED)
         breakpad_client
         spdlog::spdlog
         fmt::fmt
+        rt
         pthread)
 endif()
 
@@ -72,6 +73,7 @@ if (BUILD_STATIC)
         breakpad_client
         spdlog::spdlog
         fmt::fmt
+        rt
         pthread)
 endif()
 

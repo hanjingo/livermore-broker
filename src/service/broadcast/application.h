@@ -1,13 +1,15 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+#define DEPTH_MARKET_DATA
+
 #include <unordered_map>
 
 #include "version.h"
 #include "error.h"
 #include "config.h"
 #include "application_base.h"
-// #include "tcp_gate.h"
+#include "tcp_gate.h"
 
 namespace broadcast
 {
@@ -27,7 +29,7 @@ public:
     err_t stop() override;
 
     broadcast::config                                       conf;
-    // std::unordered_map<std::uint16_t, broadcast::tcp_gate*> tcp_gates;
+    std::unordered_map<std::uint16_t, broadcast::tcp_gate*> tcp_gates;
 };
 
 }

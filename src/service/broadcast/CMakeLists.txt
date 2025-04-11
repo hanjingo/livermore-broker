@@ -17,10 +17,12 @@ if (NOT BROADCAST_STATIC_NAME)
     set(BROADCAST_STATIC_NAME ${PROJECT_NAME}-static)
 endif()
 
-find_package(Boost REQUIRED  
+find_package(Boost REQUIRED 
+    system 
     filesystem 
     context 
     thread 
+    program_options
     coroutine)
 
 find_package(PkgConfig REQUIRED)
@@ -53,6 +55,7 @@ if (BUILD_SHARED)
         fmt::fmt
         nlohmann_json::nlohmann_json
         TBB::tbb
+        rt
         pthread)
 endif()
 
@@ -67,6 +70,7 @@ if (BUILD_STATIC)
         fmt::fmt
         nlohmann_json::nlohmann_json
         TBB::tbb
+        rt
         pthread)
 endif()
 

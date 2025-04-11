@@ -5,6 +5,7 @@
 #include <libcpp/encoding/ini.hpp>
 #include <libcpp/io/file.hpp>
 #include <libcpp/util/string_util.hpp>
+#include <libcpp/hardware/cpu.h>
 
 namespace broadcast
 {
@@ -41,8 +42,10 @@ err_t config::load(const char* filepath)
     vec = libcpp::string_util::split(cfg.get<std::string>("bind_cpu_cores"), ",");
     for (auto e : vec)
     {
-        cpu_cores.push_back(static_cast<std::uint16_t>(std::stoi(e)));
+        bind_cpu_cores.push_back(static_cast<std::uint16_t>(std::stoi(e)));
     }
+    msg_pool_size = cfg.get<int>("msg_pool_size");
+    msg_pool_size = msg_pool_size > 0 ? msg_pool_size : 1;
     
     return check();
 }
@@ -52,6 +55,10 @@ err_t config::check()
     auto err = config_base::check();
     if (err != error::ok)
         return err;
+
+    for (auto core : bind_cpu_cores)
+        if (core > cpu_cores())
+            return error::cpu_core_num_invalid;
 
     return error::ok;
 }

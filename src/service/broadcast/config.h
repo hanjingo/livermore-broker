@@ -22,7 +22,8 @@ struct config : public common::config_base
     err_t check() override;
 
     std::vector<std::uint16_t> tcp_ports;
-    std::vector<std::uint16_t> cpu_cores;
+    std::vector<std::uint16_t> bind_cpu_cores;
+    int msg_pool_size = 1;
 };
 
 }

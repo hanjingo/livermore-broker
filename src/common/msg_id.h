@@ -1,7 +1,7 @@
 #ifndef MSG_ID_H
 #define MSG_ID_H
 
-enum msg_id : std::uint16_t
+enum msg_id : unsigned long
 {
     msg_id_start = 0x0,
 

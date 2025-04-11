@@ -1,5 +1,5 @@
 #include "tx.h"
-#include "market_data_shm.h"
+#include "market_data_util.h"
 
 #include <libcpp/log/logger.hpp>
 #include <libcpp/net/http/http_client.hpp>
@@ -37,7 +37,7 @@ error tx::subscribe_market_data(const std::vector<std::string>& instruments)
         if (_m_md.find(instruments[i]) != _m_md.end())
             continue;
 
-        _m_md.emplace(instruments[i], new common::market_data_shm(instruments[i]));
+        _m_md.emplace(instruments[i], new common::market_data_shm(instruments[i], sizeof(market_data)));
         _addr.append(",");
         _addr.append(instruments[i]);
         LOG_DEBUG("sub topic={}", instruments[i]);
@@ -126,7 +126,7 @@ bool tx::_parse_md(const std::string& body, common::market_data_shm* md)
     // 21:ask_price2, 22:ask_volumn2, 23:ask_price3, 24:ask_volumn3, 25:ask_price4, 26:ask_volumn4, 
     // 27:ask_price5, 28:ask_volumn5, 29:, 30:trading_day, 31, 32, 33:highest_price, 34:lowest_price,
     // 35:, 36:settlement_price(10K)
-    md->reset();
+    common::md_util::reset(md->data());
     auto params = libcpp::string_util::split(body, "~");
     if (params.size() < 38)
         return false;
@@ -138,46 +138,46 @@ bool tx::_parse_md(const std::string& body, common::market_data_shm* md)
     std::smatch match;
     std::regex pattern(R"(v_([a-zA-Z]+)[0-9])");
     std::regex_search(params[0], match, pattern);
-    libcpp::string_to_bytes(std::string(match[1]), md->data->exchange_id); 
+    libcpp::string_to_bytes(std::string(match[1]), md->data()->exchange_id); 
 
-    libcpp::string_to_bytes(params[1], md->data->instrument_name);
-    libcpp::string_to_bytes(params[2], md->data->instrument_id);
-    md->data->last_price       = std::stod(params[3]);
-    md->data->pre_close_price  = std::stod(params[4]);
-    md->data->open_price       = std::stod(params[5]);
-    md->data->volume           = std::stod(params[6]) * 100.0;
+    libcpp::string_to_bytes(params[1], md->data()->instrument_name);
+    libcpp::string_to_bytes(params[2], md->data()->instrument_id);
+    md->data()->last_price       = std::stod(params[3]);
+    md->data()->pre_close_price  = std::stod(params[4]);
+    md->data()->open_price       = std::stod(params[5]);
+    md->data()->volume           = std::stod(params[6]) * 100.0;
 
 #ifdef DEPTH_MARKET_DATA
-    md->data->bid_price1       = std::stod(params[9]);
-    md->data->bid_volumn1      = std::stod(params[10]);
-    md->data->bid_price2       = std::stod(params[11]);
-    md->data->bid_volumn2      = std::stod(params[12]);
-    md->data->bid_price3       = std::stod(params[13]);
-    md->data->bid_volumn3      = std::stod(params[14]);
-    md->data->bid_price4       = std::stod(params[15]);
-    md->data->bid_volumn4      = std::stod(params[16]);
-    md->data->bid_price5       = std::stod(params[17]);
-    md->data->bid_volumn5      = std::stod(params[18]);
-    md->data->ask_price1       = std::stod(params[19]);
-    md->data->ask_volumn1      = std::stod(params[20]);
-    md->data->ask_price2       = std::stod(params[21]);
-    md->data->ask_volumn2      = std::stod(params[22]);
-    md->data->ask_price3       = std::stod(params[23]);
-    md->data->ask_volumn3      = std::stod(params[24]);
-    md->data->ask_price4       = std::stod(params[25]);
-    md->data->ask_volumn4      = std::stod(params[26]);
-    md->data->ask_price5       = std::stod(params[27]);
-    md->data->ask_volumn5      = std::stod(params[28]);
+    md->data()->bid_price1       = std::stod(params[9]);
+    md->data()->bid_volumn1      = std::stod(params[10]);
+    md->data()->bid_price2       = std::stod(params[11]);
+    md->data()->bid_volumn2      = std::stod(params[12]);
+    md->data()->bid_price3       = std::stod(params[13]);
+    md->data()->bid_volumn3      = std::stod(params[14]);
+    md->data()->bid_price4       = std::stod(params[15]);
+    md->data()->bid_volumn4      = std::stod(params[16]);
+    md->data()->bid_price5       = std::stod(params[17]);
+    md->data()->bid_volumn5      = std::stod(params[18]);
+    md->data()->ask_price1       = std::stod(params[19]);
+    md->data()->ask_volumn1      = std::stod(params[20]);
+    md->data()->ask_price2       = std::stod(params[21]);
+    md->data()->ask_volumn2      = std::stod(params[22]);
+    md->data()->ask_price3       = std::stod(params[23]);
+    md->data()->ask_volumn3      = std::stod(params[24]);
+    md->data()->ask_price4       = std::stod(params[25]);
+    md->data()->ask_volumn4      = std::stod(params[26]);
+    md->data()->ask_price5       = std::stod(params[27]);
+    md->data()->ask_volumn5      = std::stod(params[28]);
 #endif
 
-    libcpp::string_to_bytes(params[30].substr(0, 8), md->data->trading_day);
+    libcpp::string_to_bytes(params[30].substr(0, 8), md->data()->trading_day);
     libcpp::string_to_bytes(libcpp::string_util::fmt("{}:{}:{}", 
         params[30].substr(8, 2), params[30].substr(10, 2), params[30].substr(12, 2)), 
-        md->data->action_time);
+        md->data()->action_time);
 
-    md->data->highest_price    = std::stod(params[33]);
-    md->data->lowest_price     = std::stod(params[34]);
-    md->data->turnover         = std::stod(params[37]) * 10000.0;
+    md->data()->highest_price    = std::stod(params[33]);
+    md->data()->lowest_price     = std::stod(params[34]);
+    md->data()->turnover         = std::stod(params[37]) * 10000.0;
     return true;
 }
 
@@ -204,7 +204,7 @@ void tx::on_market_data_ntf(std::vector<common::market_data_shm*>& mds)
     for (common::market_data_shm* md : mds)
     {
         md->write();
-        LOG_DEBUG("write market data to shared memory {}", md->fmt());
+        LOG_DEBUG("write market data to shared memory {}", common::md_util::fmt(md->data()));
     }
 }
 

@@ -1,36 +1,64 @@
 #include "tcp_gate.h"
-#include "api_json.h"
 
 #include <libcpp/util/uuid.hpp>
 #include <libcpp/log/logger.hpp>
+#include <libcpp/hardware/cpu.h>
 
 namespace broadcast
 {
 
-void tcp_gate::init()
+void tcp_gate::init(int port, 
+                    int msg_pool_sz, 
+                    int cpu_core)
 {
     if (_running.load())
         return;
 
-    for (auto id = common::msg_id_start; id < common::msg_id_end; ++id)
+    _port = port;
+    _cpu_core = cpu_core;
+    for (std::uint16_t id = msg_id_start; id < msg_id_end; id++)
     {
-        objs[id].construct(id, 0, 0, 0, 0, common::encode_json, NULL);
+        for (int i = 0; i < msg_pool_sz; ++i)
+        {
+            _make_json_msg(id);
+        }
     }
 }
 
-void tcp_gate::listen(const std::uint16_t port)
+void tcp_gate::run()
 {
-    if (_running.load())
+    if (is_running())
         return;
 
     _running.store(true);
-    _li.async_accept(port, std::bind(&tcp_gate::_async_accept, this, std::placeholders::_1, std::placeholders::_2));
+    listen();
+
+    std::thread([this](){
+        if (this->_cpu_core > -1 && !cpu_bind(_cpu_core))
+        {
+            LOG_ERROR("tcp_gate bind cpu core {} fail", _cpu_core);
+            return;
+        }
+
+        while(this->is_running())
+            this->consume();
+    }).detach();
+}
+
+void tcp_gate::listen()
+{
+    if (_running.load() || _port < 1)
+        return;
+
+    _running.store(true);
+    _li.async_accept(_port, std::bind(&tcp_gate::_async_accept, this, std::placeholders::_1, std::placeholders::_2));
     _io.run();
+    LOG_DEBUG("tcp_gate listen on port {}", _port);
 }
 
 void tcp_gate::close()
 {
-    if (!_running.load())
+    if (!is_running())
         return;
 
     _running.store(false);
@@ -48,33 +76,36 @@ void tcp_gate::close()
 
 void tcp_gate::consume()
 {
-    _mgr.range([](libcpp::tcp_conn::conn_ptr_t const& conn, std::set<common::market_data_shm*>& mds) -> bool {
+    _mgr.range([this](libcpp::tcp_conn::conn_ptr_t const& conn, std::set<common::market_data_shm*>& mds) -> bool {
         if (conn == nullptr)
             return true;
         if (mds.empty())
             return true;
-        
-        api::json::md_ntf* ntf = _obj[msg_id_md_ntf].pop();
-        while (ntf == nullptr)
-        {
-            _obj[msg_id_md_ntf].construct(msg_id_md_ntf, 0, 0, 0, 0, common::encode_json, NULL);
-            ntf = _obj[msg_id_md_ntf].pop();
-            LOG_DEBUG("create obj: md_ntf");
-        }
+         
         for(auto md : mds)
         {
-            if (md == nullptr || md->flag == nullptr || md->data == nullptr)
+            if (md == nullptr || md->flag() == nullptr || md->data() == nullptr)
                 continue;
 
-            md->read();
-            if (*(md->flag) == 0)
+            if (!md->readable())
                 continue;
 
-            ntf.payload.push_back(md);
-            LOG_DEBUG("read market data from shared memory {}", md->fmt());
+            if (!md->consume())
+                continue;
+
+            auto msg = this->_pop_json_msg(msg_id_md_ntf);
+            while (msg == nullptr) 
+            {
+                this->_make_json_msg(msg_id_md_ntf);
+                msg = this->_pop_json_msg(msg_id_md_ntf);
+            }
+
+            common::md_util::to_json(md->data(), msg->payload);
+            LOG_DEBUG("read market data from shared memory {}", common::md_util::fmt(md->data()));
+            
+            conn->async_send(msg);
+            LOG_DEBUG("tcp_gate send msg->size()={}", msg->size());
         }
-        conn->async_send(&ntf);
-        LOG_DEBUG("tcp_gate send ntf.payload.size()={}", ntf.payload.size());
         return true;
     });
 }
@@ -106,9 +137,9 @@ void tcp_gate::unsubscribe(libcpp::tcp_conn::conn_ptr_t conn, std::vector<std::s
     {
         for (auto itr = mds.begin(); itr != mds.end(); ++itr)
         {
-            if ((*itr)->data == nullptr)
+            if ((*itr)->data() == nullptr)
                 continue;
-            if ((*itr)->data->instrument_id != code)
+            if ((*itr)->data()->instrument_id != code)
                 continue;
             delete *itr;
             itr = mds.erase(itr);
@@ -144,6 +175,9 @@ void tcp_gate::_async_accept(const libcpp::tcp_listener::err_t& err, libcpp::tcp
     conn->set_disconnect_handler(std::bind(&tcp_gate::_on_conn_disconnect, this, std::placeholders::_1));
     std::set<common::market_data_shm*> mds;
     _mgr.emplace(std::move(conn), std::move(mds));
+
+    // start async accept again
+    _li.async_accept(_port, std::bind(&tcp_gate::_async_accept, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void tcp_gate::_on_conn_send(libcpp::tcp_conn::conn_ptr_t conn, libcpp::tcp_conn::msg_ptr_t msg)
@@ -152,8 +186,7 @@ void tcp_gate::_on_conn_send(libcpp::tcp_conn::conn_ptr_t conn, libcpp::tcp_conn
     if (conn == nullptr || msg == nullptr)
         return;
     
-    uint16_t id;
-    _objs[id].push(msg);
+    _recycle_msg(msg);
 }
 
 void tcp_gate::_on_conn_recv(libcpp::tcp_conn::conn_ptr_t conn, libcpp::tcp_conn::msg_ptr_t msg)
@@ -162,8 +195,7 @@ void tcp_gate::_on_conn_recv(libcpp::tcp_conn::conn_ptr_t conn, libcpp::tcp_conn
     if (conn == nullptr || msg == nullptr)
         return;
     
-    uint16_t id;
-    _objs[id].push(msg);
+    _recycle_msg(msg);
 }
 
 void tcp_gate::_on_conn_disconnect(libcpp::tcp_conn::conn_ptr_t conn)
@@ -175,6 +207,26 @@ void tcp_gate::_on_conn_disconnect(libcpp::tcp_conn::conn_ptr_t conn)
     _mgr.erase(std::move(conn));
     conn->close();
     delete conn;
+}
+
+void tcp_gate::_recycle_msg(libcpp::tcp_conn::msg_ptr_t arg)
+{
+    if (arg == nullptr)
+        return;
+
+    auto msg = static_cast<json_msg*>(arg);
+    _msg_pool[msg->id].push(msg);
+}
+
+std::size_t tcp_gate::_make_json_msg(const std::uint16_t id)
+{
+    _msg_pool[id].construct(id);
+    return _msg_pool[id].size();
+}
+
+json_msg* tcp_gate::_pop_json_msg(const std::uint16_t id)
+{
+    return _msg_pool[id].pop();
 }
 
 }// namespace broadcast

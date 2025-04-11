@@ -13,6 +13,7 @@ enum error : err_t
 ok = 0x0,
 err_start = common::common_error_end,
 
+cpu_core_num_invalid,
 bind_cpu_core_fail,
 tcp_gate_create_fail,
 };
