@@ -1,10 +1,10 @@
 #ifndef SHM_H
 #define SHM_H
 
-#include <atomic>
-#include <libcpp/sync/shared_memory.hpp>
-
 #include <string>
+#include <atomic>
+
+#include <libcpp/sync/shared_memory.hpp>
 
 namespace common
 {
@@ -29,18 +29,67 @@ struct shm
     {
     }
 
-    inline T* data() { return static_cast<T*>(_shm_data.addr()); }
-    inline std::int64_t* flag() { return static_cast<std::int64_t*>(_shm_flag.addr()); }
-    inline bool readable() { return *(flag()) > 0; }
+    inline T* data() { return _data_null() ? nullptr : static_cast<T*>(_shm_data.addr()); }
+    inline bool readable() { return !_flag_null() && !_data_null(); }
+    inline bool writeable() { return !_flag_null() && !_data_null(); }
+    inline bool consumable() { return !_flag_null() && !_data_null() && *(_flag()) > 0; }
 
-    bool write(const std::size_t nconsum = 1);
-    bool write(const T* arg, const std::size_t nconsum = 1);
+    bool write()
+    {
+        if (!writeable())
+            return false;
+    
+        *(_flag()) += 1;
+        return true;
+    }
+    bool write(const T* arg, const std::size_t nconsum = 1)
+    {
+        if (!writeable())
+            return false;
+    
+        *(data()) = arg;
+        *(_flag()) += nconsum;
+        return true;
+    }
 
-    bool read();
-    bool read(T* arg);
+    bool read()
+    {
+        if (!readable())
+            return false;
+        
+        return true;
+    }
+    bool read(T* arg)
+    {
+        if (!readable())
+            return false;
+            
+        *arg = *(data());
+        return true;
+    }
 
-    bool consume();
-    bool consume(T* arg);
+    bool consume()
+    {
+        if (!consumable())
+            return false;
+        
+        *(_flag()) -= 1;
+        return true;
+    }
+    bool consume(T* arg)
+    {
+        if (!consumable())
+            return false;
+            
+        *(_flag()) -= 1;
+        *arg() = *(data());
+        return true;
+    }
+
+private:
+    inline bool _data_null() { return _shm_data.addr() == nullptr; }
+    inline bool _flag_null() { return _shm_flag.addr() == nullptr; }
+    inline std::int64_t* _flag() { return static_cast<std::int64_t*>(_shm_flag.addr()); }
 
 private:
     libcpp::shared_memory _shm_data;

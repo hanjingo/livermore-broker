@@ -4,6 +4,9 @@
 #include <libcpp/log/logger.hpp>
 #include <libcpp/hardware/cpu.h>
 
+#include "util.h"
+#include "msg_id.h"
+
 namespace broadcast
 {
 
@@ -64,7 +67,7 @@ void tcp_gate::close()
     _running.store(false);
     _io.stop();
     _li.close();
-    _mgr.range([](libcpp::tcp_conn::conn_ptr_t const& conn, std::set<common::market_data_shm*>& mds) -> bool {
+    _mgr.range([](libcpp::tcp_conn::conn_ptr_t const& conn, std::set<market_data_shm*>& mds) -> bool {
         if (conn != nullptr)
             conn->close();
         delete conn;
@@ -76,21 +79,15 @@ void tcp_gate::close()
 
 void tcp_gate::consume()
 {
-    _mgr.range([this](libcpp::tcp_conn::conn_ptr_t const& conn, std::set<common::market_data_shm*>& mds) -> bool {
+    _mgr.range([this](libcpp::tcp_conn::conn_ptr_t const& conn, std::set<market_data_shm*>& mds) -> bool {
         if (conn == nullptr)
             return true;
         if (mds.empty())
             return true;
          
-        for(auto md : mds)
+        for(market_data_shm* md : mds)
         {
-            if (md == nullptr || md->flag() == nullptr || md->data() == nullptr)
-                continue;
-
-            if (!md->readable())
-                continue;
-
-            if (!md->consume())
+            if (md == nullptr || !md->consumable() || !md->consume())
                 continue;
 
             auto msg = this->_pop_json_msg(msg_id_md_ntf);
@@ -100,7 +97,7 @@ void tcp_gate::consume()
                 msg = this->_pop_json_msg(msg_id_md_ntf);
             }
 
-            common::md_util::to_json(md->data(), msg->payload);
+            md_to_json(md->data(), msg->payload);
             LOG_DEBUG("read market data from shared memory {}", common::md_util::fmt(md->data()));
             
             conn->async_send(msg);
@@ -112,11 +109,11 @@ void tcp_gate::consume()
 
 void tcp_gate::subscribe(libcpp::tcp_conn::conn_ptr_t conn, std::vector<std::string>& codes)
 {
-    std::set<common::market_data_shm*> mds;
+    std::set<market_data_shm*> mds;
     auto bfind = _mgr.find(std::move(conn), mds);
     for (auto code : codes)
     {
-        auto md = new common::market_data_shm(code);
+        auto md = new market_data_shm(code);
         mds.insert(md);
     }
     
@@ -128,7 +125,7 @@ void tcp_gate::subscribe(libcpp::tcp_conn::conn_ptr_t conn, std::vector<std::str
 
 void tcp_gate::unsubscribe(libcpp::tcp_conn::conn_ptr_t conn, std::vector<std::string>& codes)
 {
-    std::set<common::market_data_shm*> mds;
+    std::set<market_data_shm*> mds;
     auto bfind = _mgr.find(std::move(conn), mds);
     if (!bfind)
         return;
@@ -173,7 +170,7 @@ void tcp_gate::_async_accept(const libcpp::tcp_listener::err_t& err, libcpp::tcp
 
     conn->set_recv_handler(std::bind(&tcp_gate::_on_conn_recv, this, std::placeholders::_1, std::placeholders::_2));
     conn->set_disconnect_handler(std::bind(&tcp_gate::_on_conn_disconnect, this, std::placeholders::_1));
-    std::set<common::market_data_shm*> mds;
+    std::set<market_data_shm*> mds;
     _mgr.emplace(std::move(conn), std::move(mds));
 
     // start async accept again

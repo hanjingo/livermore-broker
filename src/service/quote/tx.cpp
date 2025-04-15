@@ -1,5 +1,4 @@
 #include "tx.h"
-#include "market_data_util.h"
 
 #include <libcpp/log/logger.hpp>
 #include <libcpp/net/http/http_client.hpp>
@@ -37,7 +36,7 @@ error tx::subscribe_market_data(const std::vector<std::string>& instruments)
         if (_m_md.find(instruments[i]) != _m_md.end())
             continue;
 
-        _m_md.emplace(instruments[i], new common::market_data_shm(instruments[i], sizeof(market_data)));
+        _m_md.emplace(instruments[i], new common::shm<market_data>(instruments[i], sizeof(market_data)));
         _addr.append(",");
         _addr.append(instruments[i]);
         LOG_DEBUG("sub topic={}", instruments[i]);
@@ -90,7 +89,7 @@ error tx::_query_md(int ms)
     auto resp = cli.Get(_addr);
     LOG_TRACE("_query_md with body: {}", resp->body);
     auto instruments = libcpp::string_util::split(resp->body, ";");
-    std::vector<common::market_data_shm*> mds;
+    std::vector<common::shm<market_data>*> mds;
     std::string id;
     for (std::string str : instruments)
     {
@@ -118,7 +117,7 @@ std::string tx::_parse_id(const std::string& body)
     return match[1];
 }
 
-bool tx::_parse_md(const std::string& body, common::market_data_shm* md)
+bool tx::_parse_md(const std::string& body, common::shm<market_data>* md)
 {
     // 0:, 1:instrument_name, 2:instrument_id, 3:last_price, 4:pre_close_price, 5:open_price, 6:volume, 7:, 8:,
     // 9:bid_price1, 10:bid_volumn1, 11:bid_price2, 12:bid_volumn2, 13:bid_price3, 14:bid_volumn3, 
@@ -126,6 +125,7 @@ bool tx::_parse_md(const std::string& body, common::market_data_shm* md)
     // 21:ask_price2, 22:ask_volumn2, 23:ask_price3, 24:ask_volumn3, 25:ask_price4, 26:ask_volumn4, 
     // 27:ask_price5, 28:ask_volumn5, 29:, 30:trading_day, 31, 32, 33:highest_price, 34:lowest_price,
     // 35:, 36:settlement_price(10K)
+
     common::md_util::reset(md->data());
     auto params = libcpp::string_util::split(body, "~");
     if (params.size() < 38)
@@ -198,15 +198,14 @@ void tx::on_unsubscribe_market_data_rsp()
     LOG_DEBUG("on_unsubscribe_market_data_rsp");
 }
 
-void tx::on_market_data_ntf(std::vector<common::market_data_shm*>& mds)
+void tx::on_market_data_ntf(std::vector<market_data_shm*>& mds)
 {
     LOG_DEBUG("on_market_data_ntf with mds.size() ={} ", mds.size());
-    for (common::market_data_shm* md : mds)
+    for (market_data_shm* md : mds)
     {
         md->write();
         LOG_DEBUG("write market data to shared memory {}", common::md_util::fmt(md->data()));
     }
 }
-
 
 }

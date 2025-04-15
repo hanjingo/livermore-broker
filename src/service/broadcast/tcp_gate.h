@@ -12,8 +12,8 @@
 #include <libcpp/sync/safe_map.hpp>
 #include <libcpp/sync/object_pool.hpp>
 
-#include "msg_id.h"
-#include "market_data_util.h"
+#include "shm.h"
+#include "market_data.h"
 #include "json_msg.h"
 
 namespace broadcast
@@ -22,6 +22,7 @@ namespace broadcast
 class tcp_gate
 {
 public:
+    using market_data_shm = common::shm<market_data>;
     using json_obj_pool_t = libcpp::object_pool<json_msg>;
 
 public:
@@ -58,7 +59,7 @@ private:
 
     libcpp::tcp_listener::io_t _io;
     libcpp::tcp_listener _li;
-    libcpp::safe_map<libcpp::tcp_conn::conn_ptr_t, std::set<common::market_data_shm*> > _mgr;
+    libcpp::safe_map<libcpp::tcp_conn::conn_ptr_t, std::set<market_data_shm*> > _mgr;
     int _cpu_core{-1};
     int _port{0};
 
