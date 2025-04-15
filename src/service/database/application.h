@@ -3,15 +3,13 @@
 
 #define DEPTH_MARKET_DATA
 
-#include <unordered_map>
-
 #include "version.h"
 #include "error.h"
 #include "config.h"
 #include "application_base.h"
-#include "tcp_gate.h"
+#include "cleaner.h"
 
-namespace broadcast
+namespace database
 {
 
 class application : public common::application_base
@@ -28,8 +26,7 @@ public:
     err_t run() override;
     err_t stop() override;
 
-    broadcast::config                                       conf;
-    std::unordered_map<std::uint16_t, broadcast::tcp_gate*> tcp_gates;
+    database::config conf;
 };
 
 }

@@ -11,11 +11,12 @@ application& application::instance()
     return inst;
 }    
 
-err_t application::init()
+err_t application::init(const char* id)
 {
     LOG_DEBUG("manage application::init() enter");
+
     // load our config
-    conf.module = MODULE;
+    conf.name = std::string(id);
     err_t err = conf.load("livermore-broker.ini");
     if (err != error::ok)
         return err;
@@ -26,7 +27,7 @@ err_t application::init()
         return err;
 
     // add water mark
-    LOG_INFO("livermore-manage");
+    LOG_INFO("livermore-manage {}", conf.name);
     LOG_INFO("livermore-manage {}.{}.{}", 
         MANAGE_MAJOR_VERSION, 
         MANAGE_MINOR_VERSION, 
@@ -41,10 +42,16 @@ err_t application::run()
     LOG_DEBUG("manage run() enter");
     err_t err = error::ok;
     // add watch list
-    for (std::string serv : conf.services)
+    for (auto serv : conf.services)
     {
+        if (serv.empty())
+        {
+            LOG_WARN("skip run service with serv={}", serv);
+            continue;
+        }
+
+        LOG_DEBUG("create service with serv={}", serv);
         proc p{serv};
-        LOG_DEBUG("create service:{}", serv);
         err = p.run(true);
         if (err != error::ok)
             return err;

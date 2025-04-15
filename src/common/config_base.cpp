@@ -1,7 +1,6 @@
 #include "config_base.h"
 
 #include <chrono>
-#include <libcpp/encoding/ini.hpp>
 #include <libcpp/io/file.hpp>
 #include <libcpp/util/string_util.hpp>
 
@@ -21,14 +20,15 @@ void config_base::clear()
 err_t config_base::load(const char* filepath)
 {
     LOG_DEBUG("config base load file:{}", filepath);
-    clear();
+    config_base::clear();
 
     // parse config
     libcpp::ini file;
     if (!file.read_file(filepath))
         return error::read_config_fail;
 
-    auto cfg = file.get_child(module);
+    cfg = file.get_child(name);
+    module = cfg.get<std::string>("module");
     log_path = cfg.get<std::string>("log_path");
     log_size = MB(cfg.get<int>("log_file_size_mb"));
     log_file_num = cfg.get<int>("log_file_num");
@@ -36,11 +36,15 @@ err_t config_base::load(const char* filepath)
     log_min_lvl = static_cast<libcpp::log_lvl>(cfg.get<int>("log_min_lvl", 1));
     crash_path = cfg.get<std::string>("crash_path");
 
-    return check();
+    return error::ok;
 }
 
 err_t config_base::check()
 {
+    if (name.empty())
+        return error::conf_name_invalid;
+    if (module.empty())
+        return error::conf_module_invalid;
     if (log_size < MB(1))
         return error::log_file_size_too_small;
     if (log_size > MB(1024))
@@ -56,6 +60,11 @@ err_t config_base::check()
     // TODO check crash path
 
     return error::ok;
+}
+
+std::string config_base::to_str()
+{
+    return cfg.str();
 }
 
 }

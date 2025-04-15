@@ -10,7 +10,7 @@ class service
 {
 public:
     typedef void (* fn_info)(void);
-    typedef int (* fn_init)(void);
+    typedef int (* fn_init)(const char*);
     typedef int (* fn_run)(void);
     typedef int (* fn_stop)(void);
 
@@ -19,7 +19,7 @@ public:
     ~service() {}
 
     err_t load(const char* file);
-    err_t init();
+    err_t init(const char* id);
     err_t start(bool async = false);
     err_t stop();
 

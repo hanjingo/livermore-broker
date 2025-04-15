@@ -1,14 +1,19 @@
 #ifndef ERROR_H
 #define ERROR_H
 
+#define ERROR_MASK 0x800
+
+#include "error_base.h"
+
 namespace database
 {
 
-// [1024, 2048]
-enum class error
+enum error : err_t
 {
-// common error code [0, 63]
-ok = 0x0,
+ok = common::ok,
+err_start = common::common_error_end,
+
+
 
 };
 

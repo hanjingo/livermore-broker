@@ -9,12 +9,12 @@ set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/cmake")
 set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
 set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../deps)
 
-if (NOT MANAGE_SHARED_NAME)
-    set(MANAGE_SHARED_NAME ${PROJECT_NAME})
+if (NOT DATABASE_SHARED_NAME)
+    set(DATABASE_SHARED_NAME ${PROJECT_NAME})
 endif()
 
-if (NOT MANAGE_STATIC_NAME)
-    set(MANAGE_STATIC_NAME ${PROJECT_NAME}-static)
+if (NOT DATABASE_STATIC_NAME)
+    set(DATABASE_STATIC_NAME ${PROJECT_NAME}-static)
 endif()
 
 find_package(Boost COMPONENTS 
@@ -43,11 +43,9 @@ aux_source_directory(./ SRC)
 aux_source_directory(${COMMON_SOURCE_DIR} COMM_SRC)
 
 if (BUILD_SHARED)
-    add_library(${MANAGE_SHARED_NAME} SHARED ${SRC}
-        ${COMMON_SOURCE_DIR}/application_base.cpp
-        ${COMMON_SOURCE_DIR}/config_mgr_base.cpp)
+    add_library(${DATABASE_SHARED_NAME} SHARED ${SRC} ${COMM_SRC})
 
-    target_link_libraries(${MANAGE_SHARED_NAME} 
+    target_link_libraries(${DATABASE_SHARED_NAME} 
         ${CMAKE_DL_LIBS}
         ${Boost_LIBRARIES}
         breakpad_client
@@ -57,9 +55,9 @@ if (BUILD_SHARED)
 endif()
 
 if (BUILD_STATIC)
-    add_library(${MANAGE_STATIC_NAME} STATIC ${SRC} ${COMM_SRC})
+    add_library(${DATABASE_STATIC_NAME} STATIC ${SRC} ${COMM_SRC})
 
-    target_link_libraries(${MANAGE_STATIC_NAME} 
+    target_link_libraries(${DATABASE_STATIC_NAME} 
         ${CMAKE_DL_LIBS}
         ${Boost_LIBRARIES}
         breakpad_client

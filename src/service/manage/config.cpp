@@ -21,22 +21,20 @@ err_t config::load(const char* filepath)
     clear();
 
     LOG_DEBUG("manage config load file {}", filepath);
-    libcpp::ini file;
-    if (!file.read_file(filepath))
-        return common::error::read_config_fail;
-
-    auto cfg = file.get_child(MODULE);
-    module = MODULE;
-    log_path = cfg.get<std::string>("log_path");
-    log_size = MB(cfg.get<int>("log_file_size_mb"));
-    log_file_num = cfg.get<int>("log_file_num");
-    log_rotate_on_open = cfg.get<bool>("log_file_rotate_on_open");
-    log_min_lvl = static_cast<libcpp::log_lvl>(cfg.get<int>("log_min_lvl", 1));
-    crash_path = cfg.get<std::string>("crash_path");
+    auto err = config_base::load(filepath);
+    if (err != error::ok)
+        return err;
 
     serv_scan_dur = std::chrono::milliseconds(cfg.get<int>("service_scan_dur_ms"));
     std::string serv_array = cfg.get<std::string>("service_array");
-    services = libcpp::string_util::split(serv_array, ",");
+    auto servs = libcpp::string_util::split(serv_array, ",");
+    for (auto serv : servs)
+    {
+        if (serv.empty())
+            continue;
+
+        services.push_back(serv);
+    }
     return check();
 }
 
@@ -45,6 +43,8 @@ err_t config::check()
     auto err = common::config_base::check();
     if (err != error::ok)
         return err;
+    if (module != MODULE)
+        return common::error::conf_module_not_match;
     if (serv_scan_dur < std::chrono::milliseconds(10))
         return error::serv_scan_too_busy;
     if (serv_scan_dur > std::chrono::minutes(60))

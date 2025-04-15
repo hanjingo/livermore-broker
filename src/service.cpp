@@ -33,9 +33,9 @@ err_t service::load(const char* file)
     return common::error::ok;
 }
 
-err_t service::init()
+err_t service::init(const char* id)
 {
-    return static_cast<common::error>(_finit());
+    return static_cast<common::error>(_finit(id));
 }
 
 err_t service::start(bool async)

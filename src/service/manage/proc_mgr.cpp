@@ -25,7 +25,7 @@ err_t proc::run(const bool single)
     if (single && is_running())
         return error::proc_already_running;
 
-    auto cmd = libcpp::string_util::fmt("{} --module={}", _cmd, _tag);
+    auto cmd = libcpp::string_util::fmt("{} --name={}", _cmd, _tag);
     _child = libcpp::process::child(cmd);
     _child.detach();
     return error::ok;

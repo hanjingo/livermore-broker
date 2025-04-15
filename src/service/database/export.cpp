@@ -1,22 +1,23 @@
 #include "export.h"
-#include <thread>
+#include "error.h"
+#include "application.h"
 
 void info()
 {
     // TODO
 }
 
-int init()
+int init(const char* name)
 {
-    return 0;
+    return static_cast<int>((~ERROR_MASK) & database::application::instance().init(name));
 }
 
 int run()
 {
-    while(true) { std::this_thread::sleep_for(std::chrono::milliseconds(500)); };
+    return static_cast<int>((~ERROR_MASK) & database::application::instance().run());
 }
 
 int stop()
 {
-    return 0;
+    return static_cast<int>((~ERROR_MASK) & database::application::instance().stop());
 }

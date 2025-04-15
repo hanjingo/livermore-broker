@@ -20,7 +20,7 @@ public:
 
     static application& instance();
 
-    err_t init();
+    err_t init(const char* id);
     err_t run() override;
 
     manage::config conf;

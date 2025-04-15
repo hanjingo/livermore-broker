@@ -7,9 +7,9 @@ void info()
     // TODO
 }
 
-int init()
+int init(const char* name)
 {
-    return static_cast<int>((~ERROR_MASK) & manage::application::instance().init());
+    return static_cast<int>((~ERROR_MASK) & manage::application::instance().init(name));
 }
 
 int run()

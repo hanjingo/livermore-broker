@@ -5,7 +5,7 @@
 
 C_STYLE_EXPORT void info();
 
-C_STYLE_EXPORT int init();
+C_STYLE_EXPORT int init(const char* id);
 
 C_STYLE_EXPORT int run();
 

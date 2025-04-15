@@ -13,11 +13,11 @@ application& application::instance()
     return inst;
 }    
 
-err_t application::init()
+err_t application::init(const char* id)
 {
     LOG_DEBUG("broadcast application::init() enter");
     // load our config
-    conf.module = MODULE;
+    conf.name = std::string(id);
     err_t err = conf.load("livermore-broker.ini");
     if (err != error::ok)
         return err;
@@ -28,7 +28,7 @@ err_t application::init()
         return err;
 
     // add water mark
-    LOG_INFO("livermore-broadcast");
+    LOG_INFO("livermore-broadcast {}", conf.name);
     LOG_INFO("livermore-broadcast {}.{}.{}", 
         BROADCAST_MAJOR_VERSION, 
         BROADCAST_MINOR_VERSION, 
