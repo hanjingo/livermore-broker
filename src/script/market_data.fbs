@@ -39,10 +39,9 @@ table market_data{
     volume:float (id:35);
     pre_open_interest:float (id:36);
     open_interest:float (id:37);
-    trading_volumn:float (id:38);
-    turnover:float (id:39);
-    action_time:string (id:40);
-    action_ms:int (id:41);
+    turnover:float (id:38);
+    action_time:string (id:39);
+    action_ms:int (id:40);
 }
 
 table md_ntf{

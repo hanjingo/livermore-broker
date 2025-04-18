@@ -1,7 +1,7 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#define DEPTH_MARKET_DATA
+#define L2
 
 #include "version.h"
 #include "error.h"

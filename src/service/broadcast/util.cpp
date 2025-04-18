@@ -20,7 +20,7 @@ void md_to_json(market_data* md, libcpp::json& js)
     js["upper_limit_price"] = md->upper_limit_price;
     js["lower_limit_price"] = md->lower_limit_price;
     js["average_price"] = md->average_price;
-#ifdef DEPTH_MARKET_DATA
+#ifdef L2
     js["bid_price1"] = md->bid_price1;
     js["ask_price1"] = md->ask_price1;
     js["bid_price2"] = md->bid_price2;
@@ -45,7 +45,6 @@ void md_to_json(market_data* md, libcpp::json& js)
     js["volume"] = md->volume;
     js["pre_open_interest"] = md->pre_open_interest;
     js["open_interest"] = md->open_interest;
-    js["trading_volumn"] = md->trading_volumn;
     js["turnover"] = md->turnover;
     js["action_time"] = md->action_time;
     js["action_ms"] = md->action_ms;

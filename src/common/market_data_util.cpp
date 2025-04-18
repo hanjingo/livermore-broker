@@ -21,7 +21,7 @@ void md_util::reset(market_data* md)
     md->upper_limit_price = 0.0;
     md->lower_limit_price = 0.0;
     md->average_price = 0.0;
-#ifdef DEPTH_MARKET_DATA
+#ifdef L2
     md->bid_price1 = 0.0;
     md->ask_price1 = 0.0;
     md->bid_price2 = 0.0;
@@ -46,7 +46,6 @@ void md_util::reset(market_data* md)
     md->volume = 0.0;
     md->pre_open_interest = 0.0;
     md->open_interest = 0.0;
-    md->trading_volumn = 0.0;
     md->turnover = 0.0;
     memset(md->action_time, 0, sizeof(market_data::action_time));
     md->action_ms = 0;
@@ -55,7 +54,7 @@ void md_util::reset(market_data* md)
 std::string md_util::fmt(const market_data* md)
 {
     return libcpp::string_util::fmt(
-#ifdef DEPTH_MARKET_DATA
+#ifdef L2
         R"([trading_day:{}, instrument_name:{}, instrument_id:{}, exchange_id:{}, last_price:{}, 
             pre_close_price:{}, open_price:{}, pre_settlement_price:{}, highest_price:{}, lowest_price:{},
             close_price:{}, settlement_price:{}, upper_limit_price:{}, lower_limit_price:{}, average_price:{},
@@ -63,13 +62,13 @@ std::string md_util::fmt(const market_data* md)
             bid_price4:{}, ask_price4:{}, bid_price5:{}, ask_price5:{}, bid_volumn1:{}, ask_volumn1:{},
             bid_volumn2:{}, ask_volumn2:{}, bid_volumn3:{}, ask_volumn3:{}, bid_volumn4:{}, ask_volumn4:{}, bid_volumn5:{}, ask_volumn5:{}, 
             volume:{}, pre_open_interest:{}, open_interest:{}, 
-            trading_volumn:{}, turnover:{}, action_time:{}, action_ms:{}])",
+            turnover:{}, action_time:{}, action_ms:{}])",
 #else
         R"([trading_day:{}, instrument_name:{}, instrument_id:{}, exchange_id:{}, last_price:{}, 
             pre_close_price:{}, open_price:{}, pre_settlement_price:{}, highest_price:{}, lowest_price:{},
             close_price:{}, settlement_price:{}, upper_limit_price:{}, lower_limit_price:{}, average_price:{},
             volume:{}, pre_open_interest:{}, open_interest:{}, 
-            trading_volumn:{}, turnover:{}, action_time:{}, action_ms:{}])",
+            turnover:{}, action_time:{}, action_ms:{}])",
 #endif
         std::string(md->trading_day),
         std::string(md->instrument_name),
@@ -86,7 +85,7 @@ std::string md_util::fmt(const market_data* md)
         md->upper_limit_price,
         md->lower_limit_price,
         md->average_price,
-#ifdef DEPTH_MARKET_DATA
+#ifdef L2
         md->bid_price1,
         md->ask_price1,
         md->bid_price2,
@@ -111,7 +110,6 @@ std::string md_util::fmt(const market_data* md)
         md->volume,
         md->pre_open_interest,
         md->open_interest,
-        md->trading_volumn,
         md->turnover,
         std::string(md->action_time),
         md->action_ms
@@ -196,7 +194,7 @@ bool md_util::is_equal(const market_data* lhs, const market_data* rhs, std::stri
         return false;
     }
 
-#ifdef DEPTH_MARKET_DATA
+#ifdef L2
     if (lhs->bid_price1 != rhs->bid_price1)
     {
         memo = "bid_price1 not equal";
@@ -314,11 +312,6 @@ bool md_util::is_equal(const market_data* lhs, const market_data* rhs, std::stri
         memo = "open_interest not equal";
         return false;
     }
-    if(lhs->trading_volumn != rhs->trading_volumn)
-    {
-        memo = "trading_volumn not equal";
-        return false;
-    }
     if(lhs->turnover != rhs->turnover)
     {
         memo = "turnover not equal";
@@ -355,7 +348,7 @@ void md_util::copy_from(market_data* dst, const market_data* src)
     dst->upper_limit_price = src->upper_limit_price;
     dst->lower_limit_price = src->lower_limit_price;
     dst->average_price = src->average_price;
-#ifdef DEPTH_MARKET_DATA
+#ifdef L2
     dst->bid_price1 = src->bid_price1;
     dst->ask_price1 = src->ask_price1;
     dst->bid_price2 = src->bid_price2;
@@ -380,7 +373,6 @@ void md_util::copy_from(market_data* dst, const market_data* src)
     dst->volume = src->volume;
     dst->pre_open_interest = src->pre_open_interest;
     dst->open_interest = src->open_interest;
-    dst->trading_volumn = src->trading_volumn;
     dst->turnover = src->turnover;
     memcpy(dst->action_time, src->action_time, sizeof(market_data::action_time)),
     dst->action_ms = src->action_ms;

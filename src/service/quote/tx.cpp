@@ -147,7 +147,7 @@ bool tx::_parse_md(const std::string& body, common::shm<market_data>* md)
     md->data()->open_price       = std::stod(params[5]);
     md->data()->volume           = std::stod(params[6]) * 100.0;
 
-#ifdef DEPTH_MARKET_DATA
+#ifdef L2
     md->data()->bid_price1       = std::stod(params[9]);
     md->data()->bid_volumn1      = std::stod(params[10]);
     md->data()->bid_price2       = std::stod(params[11]);
