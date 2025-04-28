@@ -21,7 +21,7 @@ void md_util::reset(market_data* md)
     md->upper_limit_price = 0.0;
     md->lower_limit_price = 0.0;
     md->average_price = 0.0;
-#ifdef L2
+#ifdef USE_DEEP_DATA
     md->bid_price1 = 0.0;
     md->ask_price1 = 0.0;
     md->bid_price2 = 0.0;
@@ -32,16 +32,16 @@ void md_util::reset(market_data* md)
     md->ask_price4 = 0.0;
     md->bid_price5 = 0.0;
     md->ask_price5 = 0.0;
-    md->bid_volumn1 = 0.0;
-    md->ask_volumn1 = 0.0;
-    md->bid_volumn2 = 0.0;
-    md->ask_volumn2 = 0.0;
-    md->bid_volumn3 = 0.0;
-    md->ask_volumn3 = 0.0;
-    md->bid_volumn4 = 0.0;
-    md->ask_volumn4 = 0.0;
-    md->bid_volumn5 = 0.0;
-    md->ask_volumn5 = 0.0;
+    md->bid_volume1 = 0.0;
+    md->ask_volume1 = 0.0;
+    md->bid_volume2 = 0.0;
+    md->ask_volume2 = 0.0;
+    md->bid_volume3 = 0.0;
+    md->ask_volume3 = 0.0;
+    md->bid_volume4 = 0.0;
+    md->ask_volume4 = 0.0;
+    md->bid_volume5 = 0.0;
+    md->ask_volume5 = 0.0;
 #endif
     md->volume = 0.0;
     md->pre_open_interest = 0.0;
@@ -54,13 +54,13 @@ void md_util::reset(market_data* md)
 std::string md_util::fmt(const market_data* md)
 {
     return libcpp::string_util::fmt(
-#ifdef L2
+#ifdef USE_DEEP_DATA
         R"([trading_day:{}, instrument_name:{}, instrument_id:{}, exchange_id:{}, last_price:{}, 
             pre_close_price:{}, open_price:{}, pre_settlement_price:{}, highest_price:{}, lowest_price:{},
             close_price:{}, settlement_price:{}, upper_limit_price:{}, lower_limit_price:{}, average_price:{},
             bid_price1:{}, ask_price1:{}, bid_price2:{}, ask_price2:{}, bid_price3:{}, ask_price3:{},
-            bid_price4:{}, ask_price4:{}, bid_price5:{}, ask_price5:{}, bid_volumn1:{}, ask_volumn1:{},
-            bid_volumn2:{}, ask_volumn2:{}, bid_volumn3:{}, ask_volumn3:{}, bid_volumn4:{}, ask_volumn4:{}, bid_volumn5:{}, ask_volumn5:{}, 
+            bid_price4:{}, ask_price4:{}, bid_price5:{}, ask_price5:{}, bid_volume1:{}, ask_volume1:{},
+            bid_volume2:{}, ask_volume2:{}, bid_volume3:{}, ask_volume3:{}, bid_volume4:{}, ask_volume4:{}, bid_volume5:{}, ask_volume5:{}, 
             volume:{}, pre_open_interest:{}, open_interest:{}, 
             turnover:{}, action_time:{}, action_ms:{}])",
 #else
@@ -85,7 +85,7 @@ std::string md_util::fmt(const market_data* md)
         md->upper_limit_price,
         md->lower_limit_price,
         md->average_price,
-#ifdef L2
+#ifdef USE_DEEP_DATA
         md->bid_price1,
         md->ask_price1,
         md->bid_price2,
@@ -96,16 +96,16 @@ std::string md_util::fmt(const market_data* md)
         md->ask_price4,
         md->bid_price5,
         md->ask_price5,
-        md->bid_volumn1,
-        md->ask_volumn1,
-        md->bid_volumn2,
-        md->ask_volumn2,
-        md->bid_volumn3,
-        md->ask_volumn3,
-        md->bid_volumn4,
-        md->ask_volumn4,
-        md->bid_volumn5,
-        md->ask_volumn5,
+        md->bid_volume1,
+        md->ask_volume1,
+        md->bid_volume2,
+        md->ask_volume2,
+        md->bid_volume3,
+        md->ask_volume3,
+        md->bid_volume4,
+        md->ask_volume4,
+        md->bid_volume5,
+        md->ask_volume5,
 #endif
         md->volume,
         md->pre_open_interest,
@@ -194,7 +194,7 @@ bool md_util::is_equal(const market_data* lhs, const market_data* rhs, std::stri
         return false;
     }
 
-#ifdef L2
+#ifdef USE_DEEP_DATA
     if (lhs->bid_price1 != rhs->bid_price1)
     {
         memo = "bid_price1 not equal";
@@ -245,54 +245,54 @@ bool md_util::is_equal(const market_data* lhs, const market_data* rhs, std::stri
         memo = "ask_price5 not equal";
         return false;
     }
-    if(lhs->bid_volumn1 != rhs->bid_volumn1)
+    if(lhs->bid_volume1 != rhs->bid_volume1)
     {
-        memo = "bid_volumn1 not equal";
+        memo = "bid_volume1 not equal";
         return false;
     }
-    if(lhs->ask_volumn1 != rhs->ask_volumn1)
+    if(lhs->ask_volume1 != rhs->ask_volume1)
     {
-        memo = "ask_volumn1 not equal";
+        memo = "ask_volume1 not equal";
         return false;
     }
-    if(lhs->bid_volumn2 != rhs->bid_volumn2)
+    if(lhs->bid_volume2 != rhs->bid_volume2)
     {
-        memo = "bid_volumn2 not equal";
+        memo = "bid_volume2 not equal";
         return false;
     }
-    if(lhs->ask_volumn2 != rhs->ask_volumn2)
+    if(lhs->ask_volume2 != rhs->ask_volume2)
     {
-        memo = "ask_volumn2 not equal";
+        memo = "ask_volume2 not equal";
         return false;
     }
-    if(lhs->bid_volumn3 != rhs->bid_volumn3)
+    if(lhs->bid_volume3 != rhs->bid_volume3)
     {
-        memo = "bid_volumn3 not equal";
+        memo = "bid_volume3 not equal";
         return false;
     }
-    if(lhs->ask_volumn3 != rhs->ask_volumn3)
+    if(lhs->ask_volume3 != rhs->ask_volume3)
     {
-        memo = "ask_volumn3 not equal";
+        memo = "ask_volume3 not equal";
         return false;
     }
-    if(lhs->bid_volumn4 != rhs->bid_volumn4)
+    if(lhs->bid_volume4 != rhs->bid_volume4)
     {
-        memo = "bid_volumn4 not equal";
+        memo = "bid_volume4 not equal";
         return false;
     }
-    if(lhs->ask_volumn4 != rhs->ask_volumn4)
+    if(lhs->ask_volume4 != rhs->ask_volume4)
     {
-        memo = "ask_volumn4 not equal";
+        memo = "ask_volume4 not equal";
         return false;
     }
-    if(lhs->bid_volumn5 != rhs->bid_volumn5)
+    if(lhs->bid_volume5 != rhs->bid_volume5)
     {
-        memo = "bid_volumn5 not equal";
+        memo = "bid_volume5 not equal";
         return false;
     }
-    if(lhs->ask_volumn5 != rhs->ask_volumn5)
+    if(lhs->ask_volume5 != rhs->ask_volume5)
     {
-        memo = "ask_volumn5 not equal";
+        memo = "ask_volume5 not equal";
         return false;
     }
 #endif
@@ -348,7 +348,7 @@ void md_util::copy_from(market_data* dst, const market_data* src)
     dst->upper_limit_price = src->upper_limit_price;
     dst->lower_limit_price = src->lower_limit_price;
     dst->average_price = src->average_price;
-#ifdef L2
+#ifdef USE_DEEP_DATA
     dst->bid_price1 = src->bid_price1;
     dst->ask_price1 = src->ask_price1;
     dst->bid_price2 = src->bid_price2;
@@ -359,16 +359,16 @@ void md_util::copy_from(market_data* dst, const market_data* src)
     dst->ask_price4 = src->ask_price4;
     dst->bid_price5 = src->bid_price5;
     dst->ask_price5 = src->ask_price5;
-    dst->bid_volumn1 = src->bid_volumn1;
-    dst->ask_volumn1 = src->ask_volumn1;
-    dst->bid_volumn2 = src->bid_volumn2;
-    dst->ask_volumn2 = src->ask_volumn2;
-    dst->bid_volumn3 = src->bid_volumn3;
-    dst->ask_volumn3 = src->ask_volumn3;
-    dst->bid_volumn4 = src->bid_volumn4;
-    dst->ask_volumn4 = src->ask_volumn4;
-    dst->bid_volumn5 = src->bid_volumn5;
-    dst->ask_volumn5 = src->ask_volumn5;
+    dst->bid_volume1 = src->bid_volume1;
+    dst->ask_volume1 = src->ask_volume1;
+    dst->bid_volume2 = src->bid_volume2;
+    dst->ask_volume2 = src->ask_volume2;
+    dst->bid_volume3 = src->bid_volume3;
+    dst->ask_volume3 = src->ask_volume3;
+    dst->bid_volume4 = src->bid_volume4;
+    dst->ask_volume4 = src->ask_volume4;
+    dst->bid_volume5 = src->bid_volume5;
+    dst->ask_volume5 = src->ask_volume5;
 #endif
     dst->volume = src->volume;
     dst->pre_open_interest = src->pre_open_interest;

@@ -1,10 +1,6 @@
 #ifndef MARKET_DATA_H
 #define MARKET_DATA_H
 
-#ifndef L2
-#define L2 1
-#endif
-
 extern "C" 
 {
 
@@ -15,7 +11,7 @@ typedef char   md_instrument_id_t[31];
 typedef char   md_exchange_id_t[9];
 typedef double md_price_t;
 typedef double md_money_t;
-typedef double md_volumn_t;
+typedef double md_volume_t;
 typedef char   md_instrument_name_t[21];
 
 #pragma pack(push, 8)
@@ -36,7 +32,7 @@ struct market_data
     md_price_t           upper_limit_price;    // limit up price
     md_price_t           lower_limit_price;    // limit down price
     md_price_t           average_price;        // trading-volume-weighted average execution price
-#ifdef L2
+#ifdef USE_DEEP_DATA
     md_price_t           bid_price1;
     md_price_t           ask_price1;
     md_price_t           bid_price2;
@@ -47,20 +43,20 @@ struct market_data
     md_price_t           ask_price4;
     md_price_t           bid_price5;
     md_price_t           ask_price5;
-    md_volumn_t          bid_volumn1;
-    md_volumn_t          ask_volumn1;
-    md_volumn_t          bid_volumn2;
-    md_volumn_t          ask_volumn2;
-    md_volumn_t          bid_volumn3;
-    md_volumn_t          ask_volumn3;
-    md_volumn_t          bid_volumn4;
-    md_volumn_t          ask_volumn4;
-    md_volumn_t          bid_volumn5;
-    md_volumn_t          ask_volumn5;
+    md_volume_t          bid_volume1;
+    md_volume_t          ask_volume1;
+    md_volume_t          bid_volume2;
+    md_volume_t          ask_volume2;
+    md_volume_t          bid_volume3;
+    md_volume_t          ask_volume3;
+    md_volume_t          bid_volume4;
+    md_volume_t          ask_volume4;
+    md_volume_t          bid_volume5;
+    md_volume_t          ask_volume5;
 #endif
-    md_volumn_t          volume;             // trading volume
-    md_volumn_t          pre_open_interest;  // open interest on the preceding trading day
-    md_volumn_t          open_interest;      // open interest on the current trading day
+    md_volume_t          volume;             // trading volume
+    md_volume_t          pre_open_interest;  // open interest on the preceding trading day
+    md_volume_t          open_interest;      // open interest on the current trading day
     md_money_t           turnover;           // notional value
     md_time_t            action_time;        // operation time
     md_millisec_t        action_ms;          // operation time milliseconds

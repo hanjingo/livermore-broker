@@ -35,6 +35,16 @@ err_t application_base::init(const common::config_base& config)
     libcpp::crash_handler::instance()->set_local_path(config.crash_path);
     LOG_DEBUG("livermore-broker crash set local path={}", config.crash_path);
 
+    // add water mark
+    LOG_INFO("{}", MODULE);
+    LOG_INFO("{} {}.{}.{}", 
+        MODULE, 
+        MAJOR_VERSION, 
+        MINOR_VERSION, 
+        PATCH_VERSION);
+    LOG_INFO("{} compile time {}", MODULE, COMPILE_TIME);
+    LOG_INFO("{} email {}", MODULE, EMAIL);
+
     return error::ok;
 }
 

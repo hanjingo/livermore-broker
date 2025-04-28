@@ -43,8 +43,6 @@ err_t config::check()
     auto err = common::config_base::check();
     if (err != error::ok)
         return err;
-    if (module != MODULE)
-        return common::error::conf_module_not_match;
     if (serv_scan_dur < std::chrono::milliseconds(10))
         return error::serv_scan_too_busy;
     if (serv_scan_dur > std::chrono::minutes(60))

@@ -4,7 +4,6 @@
 #include <string>
 
 #include "error.h"
-#include "version.h"
 #include "config_base.h"
 
 namespace database

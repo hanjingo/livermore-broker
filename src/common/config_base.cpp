@@ -45,6 +45,8 @@ err_t config_base::check()
         return error::conf_name_invalid;
     if (module.empty())
         return error::conf_module_invalid;
+    if (module != MODULE)
+        return error::conf_module_not_match;
     if (log_size < MB(1))
         return error::log_file_size_too_small;
     if (log_size > MB(1024))

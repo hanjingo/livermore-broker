@@ -26,14 +26,6 @@ err_t application::init(const char* id)
     if (err != error::ok)
         return err;
 
-    // add water mark
-    LOG_INFO("livermore-manage {}", conf.name);
-    LOG_INFO("livermore-manage {}.{}.{}", 
-        MANAGE_MAJOR_VERSION, 
-        MANAGE_MINOR_VERSION, 
-        MANAGE_PATCH_VERSION);
-    LOG_INFO("livermore-manage compile time {}", COMPILE_TIME);
-    LOG_INFO("livermore-manage email {}", "hehehunanchina@live.com");
     return error::ok;
 }
 

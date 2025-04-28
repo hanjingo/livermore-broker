@@ -6,7 +6,6 @@
 #include <unordered_map>
 
 #include "error.h"
-#include "version.h"
 #include "config_base.h"
 
 namespace broadcast

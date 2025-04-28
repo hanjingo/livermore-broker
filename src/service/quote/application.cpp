@@ -27,15 +27,6 @@ err_t application::init(const char* id)
     if (err != error::ok)
         return err;
 
-    // add water mark
-    LOG_INFO("livermore-quote {}", conf.name);
-    LOG_INFO("livermore-quote {}.{}.{}", 
-        QUOTE_MAJOR_VERSION, 
-        QUOTE_MINOR_VERSION, 
-        QUOTE_PATCH_VERSION);
-    LOG_INFO("livermore-quote compile time {}", COMPILE_TIME);
-    LOG_INFO("livermore-quote email {}", "hehehunanchina@live.com");
-
     // mkdir ctp file dir
     if (!libcpp::filepath::is_exist(conf.ctp_flow_md_path) && 
             !libcpp::filepath::make_dir(conf.ctp_flow_md_path))

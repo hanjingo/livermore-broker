@@ -13,7 +13,6 @@ namespace broadcast
 void config::clear()
 {
     config_base::clear();
-    
 }
 
 err_t config::load(const char* filepath)
@@ -53,10 +52,6 @@ err_t config::check()
     auto err = config_base::check();
     if (err != error::ok)
         return err;
-
-    if (module != MODULE)
-        return common::error::conf_module_not_match;
-
     for (auto core : bind_cpu_cores)
         if (core > cpu_cores())
             return error::cpu_core_num_invalid;

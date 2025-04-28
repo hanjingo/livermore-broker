@@ -1,7 +1,6 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include "version.h"
 #include "error.h"
 #include "config.h"
 #include "proc_mgr.h"

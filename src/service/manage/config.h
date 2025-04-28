@@ -6,7 +6,6 @@
 #include <chrono>
 
 #include "error.h"
-#include "version.h"
 #include "config_base.h"
 
 namespace manage

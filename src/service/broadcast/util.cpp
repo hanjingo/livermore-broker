@@ -20,7 +20,7 @@ void md_to_json(market_data* md, libcpp::json& js)
     js["upper_limit_price"] = md->upper_limit_price;
     js["lower_limit_price"] = md->lower_limit_price;
     js["average_price"] = md->average_price;
-#ifdef L2
+#ifdef USE_DEEP_DATA
     js["bid_price1"] = md->bid_price1;
     js["ask_price1"] = md->ask_price1;
     js["bid_price2"] = md->bid_price2;
@@ -31,16 +31,16 @@ void md_to_json(market_data* md, libcpp::json& js)
     js["ask_price4"] = md->ask_price4;
     js["bid_price5"] = md->bid_price5;
     js["ask_price5"] = md->ask_price5;
-    js["bid_volumn1"] = md->bid_volumn1;
-    js["ask_volumn1"] = md->ask_volumn1;
-    js["bid_volumn2"] = md->bid_volumn2;
-    js["ask_volumn2"] = md->ask_volumn2;
-    js["bid_volumn3"] = md->bid_volumn3;
-    js["ask_volumn3"] = md->ask_volumn3;
-    js["bid_volumn4"] = md->bid_volumn4;
-    js["ask_volumn4"] = md->ask_volumn4;
-    js["bid_volumn5"] = md->bid_volumn5;
-    js["ask_volumn5"] = md->ask_volumn5;
+    js["bid_volume1"] = md->bid_volume1;
+    js["ask_volume1"] = md->ask_volume1;
+    js["bid_volume2"] = md->bid_volume2;
+    js["ask_volume2"] = md->ask_volume2;
+    js["bid_volume3"] = md->bid_volume3;
+    js["ask_volume3"] = md->ask_volume3;
+    js["bid_volume4"] = md->bid_volume4;
+    js["ask_volume4"] = md->ask_volume4;
+    js["bid_volume5"] = md->bid_volume5;
+    js["ask_volume5"] = md->ask_volume5;
 #endif
     js["volume"] = md->volume;
     js["pre_open_interest"] = md->pre_open_interest;

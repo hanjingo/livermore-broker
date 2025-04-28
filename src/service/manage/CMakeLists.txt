@@ -2,7 +2,26 @@ cmake_minimum_required(VERSION 3.19.2)
 
 set(CMAKE_CXX_STANDARD 11)
 
-project(manage)
+project(manage LANGUAGES CXX)
+
+# Version Info
+set(MANAGE_VERSION_MAJOR 0)
+set(MANAGE_VERSION_MINOR 0)
+set(MANAGE_VERSION_PATCH 1)
+set(MANAGE_VERSION ${MANAGE_VERSION_MAJOR}.${MANAGE_VERSION_MINOR}.${MANAGE_VERSION_PATCH})
+
+# Project Info
+set(PACKAGE_NAME      "${PROJECT_NAME}")
+set(PACKAGE_VERSION   "${MANAGE_VERSION}-dev")
+set(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
+set(PACKAGE_BUGREPORT "https://github.com/hanjingo/livermore-broker/issues")
+
+add_definitions(-DMODULE="${PROJECT_NAME}")
+add_definitions(-DMAJOR_VERSION=${MANAGE_VERSION_MAJOR})
+add_definitions(-DMINOR_VERSION=${MANAGE_VERSION_MINOR})
+add_definitions(-DPATCH_VERSION=${MANAGE_VERSION_PATCH})
+add_definitions(-DEMAIL="hehehunanchina@live.com")
+add_definitions(-DUSE_DEEP_DATA=true) # Use Deep Market Data
 
 set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/pkgconfig")
 set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/cmake")

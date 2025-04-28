@@ -7,7 +7,6 @@
 
 #include <libcpp/os/process.hpp>
 
-#include "version.h"
 #include "error.h"
 
 namespace manage

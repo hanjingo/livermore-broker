@@ -27,15 +27,6 @@ err_t application::init(const char* id)
     if (err != error::ok)
         return err;
 
-    // add water mark
-    LOG_INFO("livermore-broadcast {}", conf.name);
-    LOG_INFO("livermore-broadcast {}.{}.{}", 
-        BROADCAST_MAJOR_VERSION, 
-        BROADCAST_MINOR_VERSION, 
-        BROADCAST_PATCH_VERSION);
-    LOG_INFO("livermore-broadcast compile time {}", COMPILE_TIME);
-    LOG_INFO("livermore-broadcast email {}", "hehehunanchina@live.com");
-
     // init tcp gate
     for (auto port : conf.tcp_ports)
     {

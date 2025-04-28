@@ -75,8 +75,6 @@ err_t config::check()
     auto err = config_base::check();
     if (err != error::ok)
         return err;
-    if (module != MODULE)
-        return common::error::conf_module_not_match;
     if (ctp_addrs.empty())
         return error::ctp_addr_empty;
     if (ctp_flow_md_path.empty())

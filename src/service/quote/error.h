@@ -3,6 +3,7 @@
 
 #define ERROR_MASK 0x200
 
+#include <string>
 #include "error_base.h"
 
 namespace quote
@@ -58,7 +59,7 @@ template<typename T>
 static std::string err_what(const T err)
 {
 
-std::string str = common::err_what(err);
+std::string str = common::err_what<T>(err);
 if (!str.empty())
     return str;
 
