@@ -4,10 +4,10 @@ set(CMAKE_CXX_STANDARD 11)
 
 project(database)
 
-set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/pkgconfig")
-set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/cmake")
 set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
 set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../deps)
+set(ENV{PKG_CONFIG_PATH} "${DEPS_DIR}/lib/pkgconfig")
+set(CMAKE_PREFIX_PATH "${DEPS_DIR}/lib/cmake")
 
 if (NOT DATABASE_SHARED_NAME)
     set(DATABASE_SHARED_NAME ${PROJECT_NAME})

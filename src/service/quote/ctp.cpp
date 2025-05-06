@@ -2,7 +2,7 @@
 #include "string.h"
 
 #include <libcpp/log/logger.hpp>
-#include <libcpp/sync/defer.hpp>
+#include <libcpp/util/defer.hpp>
 
 namespace quote
 {

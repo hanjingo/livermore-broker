@@ -23,10 +23,10 @@ add_definitions(-DPATCH_VERSION=${MANAGE_VERSION_PATCH})
 add_definitions(-DEMAIL="hehehunanchina@live.com")
 add_definitions(-DUSE_DEEP_DATA=true) # Use Deep Market Data
 
-set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/pkgconfig")
-set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../deps/lib/cmake")
 set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
 set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../deps)
+set(ENV{PKG_CONFIG_PATH} "${DEPS_DIR}/lib/pkgconfig")
+set(CMAKE_PREFIX_PATH "${DEPS_DIR}/lib/cmake")
 
 if (NOT MANAGE_SHARED_NAME)
     set(MANAGE_SHARED_NAME ${PROJECT_NAME})
@@ -50,7 +50,7 @@ find_package(fmt REQUIRED)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${COMMON_SOURCE_DIR})
 include_directories(${DEPS_DIR}/include)
-include_directories(${DEPS_DIR}/include/breakpad)
+include_directories(${BREAKPAD_INCLUDE_DIRS})
 include_directories(${DEPS_DIR}/include/fmt)
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})

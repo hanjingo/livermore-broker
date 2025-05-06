@@ -97,13 +97,15 @@ endif()
 if (UNIX)
     set(CTP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp-traderAPI/v3.7.3_20240910_api_traderapi_linux64_se)
     file(GLOB all_ctp_src "${CTP_ROOT}/*.h")
-    set(CTP_CONF_CMD cp -p ${all_ctp_src} ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp-traderAPI/)
+    set(CTP_CONF_CMD mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/lib && mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp-traderAPI/)
+    set(CTP_BUILD_CMD cp -p ${all_ctp_src} ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp-traderAPI/)
     set(CTP_INSTALL_CMD 
     cp -p ${CTP_ROOT}/soptthostmduserapi_se.so ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthostmduserapi_se.so && cp -p ${CTP_ROOT}/soptthosttraderapi_se.so ${CMAKE_CURRENT_SOURCE_DIR}/lib/libsoptthosttraderapi_se.so)
 else()
     set(CTP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/ctp-traderAPI/3.7.3_winapi_202409101516/20240910_traderapi64_windows_se)
     file(GLOB all_ctp_src "${CTP_ROOT}/*.h")
-    set(CTP_CONF_CMD cp -p ${all_ctp_src} ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp-traderAPI/)
+    set(CTP_CONF_CMD mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/lib && mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp-traderAPI/)
+    set(CTP_BUILD_CMD cp -p ${all_ctp_src} ${CMAKE_CURRENT_SOURCE_DIR}/include/ctp-traderAPI/)
     set(CTP_INSTALL_CMD "")
 endif()
 ExternalProject_Add(ctp-traderAPI
@@ -111,14 +113,14 @@ ExternalProject_Add(ctp-traderAPI
     DOWNLOAD_NAME traderAPI_3.7.3_20240910.zip
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}
     CONFIGURE_COMMAND ${CTP_CONF_CMD}
-    BUILD_COMMAND ""
+    BUILD_COMMAND ${CTP_BUILD_CMD}
     INSTALL_COMMAND ${CTP_INSTALL_CMD})
 
 if (UNIX)
     set(XTP_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/src/xtp/bin)
     file(GLOB all_xtp_src "${XTP_ROOT}/include/*.h")
     file(GLOB all_xtp_dll "${XTP_ROOT}/linux_glibc_2.17/*.so")
-    set(XTP_CONF_CMD mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/lib && mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/include/xtp)
+    set(XTP_CONF_CMD mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/lib && mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/include/xtp/)
     set(XTP_BUILD_CMD cp -p ${all_xtp_src} ${CMAKE_CURRENT_SOURCE_DIR}/include/xtp/)
     set(XTP_INSTALL_CMD cp -p ${all_xtp_dll} ${CMAKE_CURRENT_SOURCE_DIR}/lib/)
 else()

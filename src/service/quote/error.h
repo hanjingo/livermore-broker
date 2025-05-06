@@ -106,6 +106,8 @@ switch (err)
 
     case tx_unknow_error: return "tx_unknow_error";
 }
+
+return "";
 }
 
 }

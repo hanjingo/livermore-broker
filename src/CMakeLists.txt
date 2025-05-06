@@ -5,6 +5,8 @@ project(livermore-broker)
 set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../deps/lib/pkgconfig")
 set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../deps/lib/cmake")
 
+set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../deps)
+
 add_subdirectory(service)
 add_subdirectory(script)
 
@@ -14,6 +16,7 @@ find_package(Boost COMPONENTS
 
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${DEPS_DIR}/include)
 
 link_directories(${DEPS_DIR}/lib)
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
