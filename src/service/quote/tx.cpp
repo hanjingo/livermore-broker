@@ -200,11 +200,11 @@ void tx::on_unsubscribe_market_data_rsp()
 
 void tx::on_market_data_ntf(std::vector<market_data_shm*>& mds)
 {
-    LOG_DEBUG("on_market_data_ntf with mds.size() ={} ", mds.size());
+    // LOG_DEBUG("on_market_data_ntf with mds.size() ={} ", mds.size());
     for (market_data_shm* md : mds)
     {
         md->write();
-        LOG_DEBUG("write market data to shared memory {}", common::md_util::fmt(md->data()));
+        // LOG_DEBUG("write market data to shared memory {}", common::md_util::fmt(md->data()));
     }
 }
 

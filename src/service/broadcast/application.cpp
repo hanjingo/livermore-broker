@@ -44,6 +44,7 @@ err_t application::init(const char* id)
         tcp_gates.emplace(port, gate);
     }
 
+    LOG_INFO("broadcast tcp gates initialized successfully.");
     return error::ok;
 }
 
@@ -60,7 +61,7 @@ err_t application::run()
             if (itr->second == nullptr)
                 continue;
             
-            // run
+            // rerun
             itr->second->run();
         }
 
