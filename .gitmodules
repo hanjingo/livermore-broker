@@ -1,12 +1,1 @@
-[submodule "3rdparty/libcpp"]
-	path = 3rdparty/libcpp
-	url = git@github.com:hanjingo/libcpp.git
-	branch = v1.x
-[submodule "3rdparth/cmakes"]
-	path = 3rdparth/cmakes
-	url = git@github.com:hanjingo/cmakes.git
-	branch = main
-[submodule "3rdparty/cmakes"]
-	path = 3rdparty/cmakes
-	url = git@github.com:hanjingo/cmakes.git
-	branch = main
+

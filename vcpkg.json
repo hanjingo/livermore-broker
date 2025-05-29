@@ -1,0 +1,13 @@
+{
+  "dependencies": [
+    "fmt",
+    "breakpad",
+    "spdlog",
+    "cpp-httplib",
+    "boost",
+    "pkgconf"
+  ],
+  "overrides": [
+    { "name": "boost", "version": "1.75.0" }
+  ]
+}

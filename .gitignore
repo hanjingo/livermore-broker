@@ -44,9 +44,20 @@
 # macos
 .DS_Store
 
+# Visual Studio
+out
+.vs
+CMakePresets.json
+CMakeUserPresets.json
+
+# build path
+bin
+build
+
 # Depend
 deps/*
 !deps/CMakeLists.txt
+vcpkg_installed
 
 # Directory
 build
