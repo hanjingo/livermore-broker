@@ -49,6 +49,7 @@ out
 .vs
 CMakePresets.json
 CMakeUserPresets.json
+CMakeSettings.json
 
 # build path
 bin
