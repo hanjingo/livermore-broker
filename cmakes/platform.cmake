@@ -17,6 +17,6 @@ function(detect_triplet OUT_VAR)
         set(_PLATFORM "unknown")
     endif()
 
-    set(_TRIPLET "${_ARCH}-${_PLATFORM}" PARENT_SCOPE)
-    set(${OUT_VAR} "${_TRIPLET}" PARENT_SCOPE)
+    set(_TRIPLET "${_ARCH}-${_PLATFORM}")
+    set(${OUT_VAR} "${_TRIPLET}" CACHE INTERNAL "vcpkg triplet")
 endfunction()

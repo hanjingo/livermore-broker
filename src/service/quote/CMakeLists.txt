@@ -24,9 +24,9 @@ add_definitions(-DEMAIL="hehehunanchina@live.com")
 add_definitions(-DUSE_DEEP_DATA=true) # Use Deep Market Data
 
 set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
-set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../deps)
-set(ENV{PKG_CONFIG_PATH} "${DEPS_DIR}/lib/pkgconfig")
-set(CMAKE_PREFIX_PATH "${DEPS_DIR}/lib/cmake")
+# set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../deps)
+# set(ENV{PKG_CONFIG_PATH} "${DEPS_DIR}/lib/pkgconfig")
+# set(CMAKE_PREFIX_PATH "${DEPS_DIR}/lib/cmake")
 
 if (NOT QUOTE_SHARED_NAME)
     set(QUOTE_SHARED_NAME ${PROJECT_NAME})
@@ -41,17 +41,19 @@ find_package(Boost COMPONENTS
     coroutine
     program_options)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(BREAKPAD REQUIRED breakpad-client)
+# find_package(PkgConfig REQUIRED)
+# pkg_check_modules(BREAKPAD REQUIRED breakpad-client)
 
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
 find_package(httplib REQUIRED)
+find_package(libcpp REQUIRED)
+#find_package(BREAKPAD REQUIRED)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${COMMON_SOURCE_DIR})
-include_directories(${DEPS_DIR}/include)
-include_directories(${BREAKPAD_INCLUDE_DIRS})
+#include_directories(${DEPS_DIR}/include)
+#include_directories(${BREAKPAD_INCLUDE_DIRS})
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 link_directories(${DEPS_DIR}/lib)
@@ -59,8 +61,8 @@ link_directories(${DEPS_DIR}/lib)
 aux_source_directory(./ SRC)
 aux_source_directory(${COMMON_SOURCE_DIR} COMM_SRC)
 
-find_library(CTP_MDAPI soptthostmduserapi_se PATH ${DEPS_DIR}/lib)
-find_library(CTP_TRADER soptthosttraderapi_se PATH ${DEPS_DIR}/lib)
+# find_library(CTP_MDAPI soptthostmduserapi_se PATH ${DEPS_DIR}/lib)
+# find_library(CTP_TRADER soptthosttraderapi_se PATH ${DEPS_DIR}/lib)
 
 find_library(XTP_QUOTE xtpquoteapi PATH ${DEPS_DIR}/lib)
 
@@ -70,14 +72,15 @@ if (BUILD_SHARED)
     target_link_libraries(${QUOTE_SHARED_NAME} 
         ${CMAKE_DL_LIBS}
         ${Boost_LIBRARIES}
-        ${CTP_MDAPI}
-        ${CTP_TRADER}
+        # ${CTP_MDAPI}
+        # ${CTP_TRADER}
         ${XTP_QUOTE}
         breakpad_client
         spdlog::spdlog
         fmt::fmt
         rt
-        pthread)
+        pthread
+        libcpp)
 endif()
 
 if (BUILD_STATIC)
@@ -86,14 +89,15 @@ if (BUILD_STATIC)
     target_link_libraries(${QUOTE_STATIC_NAME} 
         ${CMAKE_DL_LIBS}
         ${Boost_LIBRARIES}
-        ${CTP_MDAPI}
-        ${CTP_TRADER}
+        # ${CTP_MDAPI}
+        # ${CTP_TRADER}
         ${XTP_QUOTE}
         breakpad_client
         spdlog::spdlog
         fmt::fmt
         rt
-        pthread)
+        pthread
+        libcpp)
 endif()
 
 message("service ${PROJECT_NAME} build success")

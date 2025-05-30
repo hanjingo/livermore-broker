@@ -5,7 +5,7 @@
 #include "config.h"
 #include "application_base.h"
 
-#include "ctp.h"
+//#include "ctp.h"
 #include "xtp.h"
 #include "tx.h"
 
@@ -28,7 +28,7 @@ public:
     err_t run() override;
 
     quote::config       conf;
-    quote::ctp*         ctp_obj;
+    //quote::ctp*         ctp_obj;
     quote::xtp*         xtp_obj;
     quote::tx*          tx_obj;
 };

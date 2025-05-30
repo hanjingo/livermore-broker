@@ -1,10 +1,17 @@
 cmake_minimum_required(VERSION 3.19.2)
 
-# # import vcpkg module
-# if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-#     if(DEFINED ENV{VCPKG_ROOT})
-#         set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
-#     endif()
+# import vcpkg module
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    if(DEFINED ENV{VCPKG_ROOT})
+        set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+    endif()
+endif()
+
+# # cmake module path
+# if (NOT DEFINED CMAKE_MODULE_PATH)
+#     set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmakes)
+# else()
+#     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmakes)
 # endif()
 
 # Version Info
@@ -62,15 +69,11 @@ option(BUILD_STATIC "Build static object" OFF)
 # Options--build
 option(BUILD_TESTS "Build test" OFF)
 option(BUILD_BENCHMARK "Build benchmark" OFF)
-option(BUILD_DEPS "Build dependencies" OFF)
 
 add_subdirectory(deps)
 
 if (DEPS_COMPLETE)
     add_subdirectory(src)
-else()
-    message(FATAL "Dependencies not complete, please run vcpkg install or build deps manually")
-    return()
 endif()
 
 if (BUILD_TESTS)

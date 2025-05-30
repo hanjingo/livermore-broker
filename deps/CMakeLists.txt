@@ -1,44 +1,40 @@
 # use this file to download and install dependencies only if vcpkg is invalid
 cmake_minimum_required(VERSION 3.19.2)
 
+message(STATUS "TRIPLET_PLATFORM = ${TRIPLET_PLATFORM}")
+
 include(ExternalProject)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../cmakes/platform.cmake)
-detect_triplet(TRIPLET)
-set(DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${TRIPLET}" PARENT_SCOPE)
+detect_triplet(TRIPLET_PLATFORM)
 
-# set deps path
-set(ENV{PKG_CONFIG_PATH} "${DEPS_DIR}/lib/pkgconfig")
-set(CMAKE_PREFIX_PATH "${DEPS_DIR}/lib/cmake")
-
-find_package(fmt)
-find_package(spdlog)
-find_package(httplib)
-find_package(Boost)
-find_package(libcpp)
-find_package(PkgConfig)
-
-# pkg-config only for linux/mingw
-if (PkgConfig_FOUND)
-    pkg_check_modules(BREAKPAD breakpad-client)
+# set deps cmake path
+if (DEFINED VCPKG_INSTALLED_DIR)
+    set(DEPS_DIR "${VCPKG_INSTALLED_DIR}/${TRIPLET_PLATFORM}")
+else()
+    set(DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${TRIPLET_PLATFORM}")
 endif()
 
-set(CTP_FOUND true)
-set(XTP_FOUND true)
+set(CTP_INCLUDE_DIR ${DEPS_DIR}/include/ctp)
+set(CTP_LIB_DIR ${DEPS_DIR}/lib)
+set(XTP_INCLUDE_DIR ${DEPS_DIR}/include/xtp)
+set(XTP_LIB_DIR ${DEPS_DIR}/lib)
 
-if(fmt_FOUND AND 
-        spdlog_FOUND AND 
-        httplib_FOUND AND 
-        Boost_FOUND AND
-        BREAKPAD_FOUND AND
-        LIBCPP_FOUND AND
-        CTP_FOUND AND
-        XTP_FOUND)
+find_package(libcpp)
+# if (EXISTS ${CTP_INCLUDE_DIR} AND EXISTS ${CTP_LIB_DIR})
+#     set(CTP_FOUND true)
+# endif()
+if (EXISTS ${XTP_INCLUDE_DIR} AND EXISTS ${XTP_LIB_DIR})
+    set(XTP_FOUND true)
+endif()
+
+if(libcpp_FOUND AND
+    # CTP_FOUND AND
+    XTP_FOUND)
     set(DEPS_COMPLETE true PARENT_SCOPE)
 else()
     set(DEPS_COMPLETE false PARENT_SCOPE)
 endif()
 
-# --------------------------------- build deps ---------------------------------
 if (NOT DEPS_COMPLETE)
     message(STATUS "Building dependencies...")
 else()
@@ -46,41 +42,19 @@ else()
     return()
 endif()
 
-if (UNIX)
-    set(CTP_ROOT ${DEPS_DIR}/src/ctp-traderAPI/v6.7.9_P1_20250319_traderapi/v6.7.9_P1_20250319_traderapi/v6.7.9_P1_20250319_api_traderapi_linux64/v6.7.9_P1_20250319_api/v6.7.9_P1_20250319_api_traderapi_se_linux64)
-    set(XTP_ROOT ${DEPS_DIR}/src/xtp/bin)
+# --------------------------------- build deps ---------------------------------
+set(XTP_INCLUDE_ROOT ${DEPS_DIR}/src/xtp/bin/include)
+if (TRIPLET_PLATFORM STREQUAL "x64-linux")
+    # set(CTP_ROOT ${DEPS_DIR}/src/ctp/v3.7.3_20240910_api_traderapi_linux64_se)
+    set(XTP_LIB_ROOT ${DEPS_DIR}/src/xtp/bin/linux_glibc_2.17)
+elseif(TRIPLET_PLATFORM STREQUAL "x64-windows")
+    # set(CTP_ROOT ${DEPS_DIR}/src/ctp/3.7.3_winapi_202409101516/20240910_traderapi64_windows_se)
+    set(XTP_LIB_ROOT ${DEPS_DIR}/src/xtp/bin/win64/dll)
+elseif(TRIPLET_PLATFORM STREQUAL "x86-windows")
+    # set(CTP_ROOT ${DEPS_DIR}/src/ctp3.7.3_winapi_202409101516/20240910_traderapi_windows_se)
+    set(XTP_LIB_ROOT ${DEPS_DIR}/src/xtp/bin/win32/dll)
 else()
-    set(CTP_ROOT ${DEPS_DIR}/src/ctp-traderAPI/v6.7.9_P1_20250319_traderapi/v6.7.9_P1_20250319_traderapi/v6.7.9_P1_20250319_winApi/traderapi/20250319_traderapi64_se_windows)
-    set(XTP_ROOT ${DEPS_DIR}/src/xtp/bin)
-endif()
-set(BREAKPAD_ROOT ${DEPS_DIR}/src/breakpad)
-set(BOOST_ROOT ${DEPS_DIR}/src/boost)
-
-if(NOT fmt_FOUND)
-    ExternalProject_Add(fmt
-        URL https://github.com/fmtlib/fmt/releases/download/11.1.4/fmt-11.1.4.zip
-        DOWNLOAD_NAME fmt_11_1_4.zip
-        PREFIX ${DEPS_DIR}
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${DEPS_DIR} -DFMT_TEST=OFF -DFMT_DOC=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON)
-endif()
-
-if(NOT BREAKPAD_FOUND)
-    if (UNIX)
-        set(BREAKPAD_CONF_CMD cd ${BREAKPAD_ROOT} && pwd && ./configure --prefix=${DEPS_DIR})
-        set(BREAKPAD_BUILD_CMD cd ${BREAKPAD_ROOT} && make)
-        set(BREAKPAD_INSTALL_CMD cd ${BREAKPAD_ROOT} && make install)
-    else()
-#        set(BREAKPAD_CONF_CMD cd ${BREAKPAD_ROOT} && pwd && python3 configure.py --prefix=${DEPS_DIR} --no-gclient --no-svn --no-git --no-ninja --no-gn --no-gn-gen --no-gn-build --no-gn-install)
-#        set(BREAKPAD_BUILD_CMD cd ${BREAKPAD_ROOT} && python3 build.py)
-#        set(BREAKPAD_INSTALL_CMD cd ${BREAKPAD_ROOT} && python3 install.py)
-    endif()
-    ExternalProject_Add(breakpad
-        URL https://github.com/hanjingo/breakpad/archive/refs/tags/v2024.02.16+v2024.02.01.zip
-        DOWNLOAD_NAME breakpad_v2024_02_16.zip
-        PREFIX ${DEPS_DIR}
-        CONFIGURE_COMMAND ${BREAKPAD_CONF_CMD}
-        BUILD_COMMAND ${BREAKPAD_BUILD_CMD}
-        INSTALL_COMMAND ${BREAKPAD_INSTALL_CMD})
+    message(FATAL "Not support this system: ${TRIPLET_PLATFORM}")
 endif()
 
 if(NOT libcpp_FOUND)
@@ -91,77 +65,41 @@ if(NOT libcpp_FOUND)
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${DEPS_DIR})
 endif()
 
-if(NOT spdlog_FOUND)
-    ExternalProject_Add(spdlog
-        URL https://github.com/gabime/spdlog/archive/refs/tags/v1.11.0.zip
-        DOWNLOAD_NAME spdlog_1_11_0.zip
-        PREFIX ${DEPS_DIR}
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${DEPS_DIR} -DSPDLOG_BUILD_EXAMPLE=OFF -DSPDLOG_BUILD_PIC=ON)
-endif()
-
-if(NOT httplib_FOUND)
-    ExternalProject_Add(httplib
-        URL https://github.com/yhirose/cpp-httplib/archive/refs/tags/v0.20.0.zip
-        DOWNLOAD_NAME httplib_0_20_0.zip
-        PREFIX ${DEPS_DIR}
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${DEPS_DIR})
-endif()
-
-if (NOT Boost_FOUND)
-    ExternalProject_Add(boost
-        URL https://archives.boost.io/release/1.75.0/source/boost_1_75_0.zip
-        DOWNLOAD_NAME boost_1_75_0.zip
-        PREFIX ${DEPS_DIR}
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND cd ${BOOST_ROOT} && ./bootstrap.sh --prefix=${DEPS_DIR}
-        INSTALL_COMMAND cd ${BOOST_ROOT} && ./b2 --with-filesystem --with-coroutine --with-program_options install)
-endif()
-
-if (NOT CTP_FOUND)
-    set(CTP_INCLUDE_DIR ${DEPS_DIR}/include/ctp)
-    set(CTP_LIB_DIR ${DEPS_DIR}/lib)
-    set(CTP_COPY_HEADER_CMD
-        ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/ThostFtdcMdApi.h ${CTP_INCLUDE_DIR} && 
-        ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/ThostFtdcTraderApi.h ${CTP_INCLUDE_DIR} && 
-        ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/ThostFtdcUserApiDataType.h ${CTP_INCLUDE_DIR} && 
-        ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/ThostFtdcUserApiStruct.h ${CTP_INCLUDE_DIR} && 
-    )
-    if (UNIX)
-        set(CTP_COPY_DLL_CMD 
-            ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/soptthostmduserapi_se.so ${CTP_LIB_DIR} && 
-            ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/soptthosttraderapi_se.so ${CTP_LIB_DIR}
-        )
-    else()
-        set(CTP_COPY_DLL_CMD 
-            ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/thostmduserapi_se.dll ${CTP_LIB_DIR} && 
-            ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/thostmduserapi_se.lib ${CTP_LIB_DIR} &&
-            ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/thosttraderapi_se.dll ${CTP_LIB_DIR} &&
-            ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/thosttraderapi_se.lib ${CTP_LIB_DIR}
-        )
-    endif()
-    ExternalProject_Add(ctp
-        URL https://www.simnow.com.cn/DocumentDown/api_3/5_2_2/v6.7.9_P1_20250319_traderapi.zip
-        URL_HASH MD5=ff28a54e5d492aff7809a115c724b1c7
-        DOWNLOAD_NAME v6.7.9_P1_20250319_traderapi.zip
-        PREFIX ${DEPS_DIR}
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND 
-            ${CTP_COPY_HEADER_CMD} &&
-            ${CTP_COPY_DLL_CMD}
-        )
-endif()
+# if (NOT CTP_FOUND)
+#     set(CTP_COPY_HEADER_CMD
+#         ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/ThostFtdcMdApi.h ${CTP_INCLUDE_DIR} && 
+#         ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/ThostFtdcTraderApi.h ${CTP_INCLUDE_DIR} && 
+#         ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/ThostFtdcUserApiDataType.h ${CTP_INCLUDE_DIR} && 
+#         ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/ThostFtdcUserApiStruct.h ${CTP_INCLUDE_DIR} && 
+#     )
+#     if (TRIPLET_PLATFORM STREQUAL "x64-linux")
+#         set(CTP_COPY_DLL_CMD 
+#             ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/soptthostmduserapi_se.so ${CTP_LIB_DIR} && 
+#             ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/soptthosttraderapi_se.so ${CTP_LIB_DIR}
+#         )
+#     else()
+#         set(CTP_COPY_DLL_CMD 
+#             ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/thostmduserapi_se.dll ${CTP_LIB_DIR} && 
+#             ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/thostmduserapi_se.lib ${CTP_LIB_DIR} &&
+#             ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/thosttraderapi_se.dll ${CTP_LIB_DIR} &&
+#             ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/thosttraderapi_se.lib ${CTP_LIB_DIR}
+#         )
+#     endif()
+#     ExternalProject_Add(ctp
+#         URL https://github.com/hanjingo/res/blob/main/bin/V3.7.3TraderAPI.zip
+#         DOWNLOAD_NAME V3.7.3TraderAPI.zip
+#         PREFIX ${DEPS_DIR}
+#         CONFIGURE_COMMAND ""
+#         BUILD_COMMAND ""
+#         INSTALL_COMMAND 
+#             ${CTP_COPY_HEADER_CMD} &&
+#             ${CTP_COPY_DLL_CMD}
+#         )
+# endif()
 
 if (NOT XTP_FOUND)
-    set(XTP_INCLUDE_DIR ${DEPS_DIR}/include/xtp)
-    set(XTP_LIB_DIR ${DEPS_DIR}/lib)
-    if (UNIX)
-        set(XTP_COPY_HEADER_CMD ${CMAKE_COMMAND} -E copy_directory ${XTP_ROOT}/include/ ${XTP_INCLUDE_DIR})
-        set(XTP_COPY_DLL_CMD ${CMAKE_COMMAND} -E copy_directory ${XTP_ROOT}/linux_glibc_2.17 ${XTP_LIB_DIR})
-    else()
-        set(XTP_COPY_HEADER_CMD ${CMAKE_COMMAND} -E copy_directory ${XTP_ROOT}/include/ ${XTP_INCLUDE_DIR})
-        set(XTP_COPY_DLL_CMD ${CMAKE_COMMAND} -E copy_directory ${XTP_ROOT}/win64/dll ${XTP_LIB_DIR})
-    endif()
+    set(XTP_COPY_HEADER_CMD ${CMAKE_COMMAND} -E copy_directory ${XTP_INCLUDE_ROOT} ${XTP_INCLUDE_DIR})
+    set(XTP_COPY_DLL_CMD ${CMAKE_COMMAND} -E copy_directory ${XTP_LIB_ROOT} ${XTP_LIB_DIR})
 
     file(MAKE_DIRECTORY ${XTP_INCLUDE_DIR})
     file(MAKE_DIRECTORY ${XTP_LIB_DIR})
