@@ -2,20 +2,16 @@ cmake_minimum_required(VERSION 3.19.2)
 
 project(livermore-broker)
 
-# set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../deps/lib/pkgconfig")
-# set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../deps/lib/cmake")
-
-# set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../deps)
-
 add_subdirectory(service)
 add_subdirectory(script)
 
-find_package(Boost COMPONENTS 
+find_package(Boost REQUIRED COMPONENTS
     program_options
     filesystem)
+find_package(spdlog REQUIRED)
+find_package(fmt REQUIRED)
 find_package(libcpp REQUIRED)
 
-include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
@@ -28,6 +24,8 @@ target_link_libraries(${PROJECT_NAME}
     ${CMAKE_DL_LIBS}
     ${Boost_LIBRARIES}
     pthread
+    spdlog::spdlog
+    fmt::fmt
     libcpp)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config/livermore-broker.ini DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}

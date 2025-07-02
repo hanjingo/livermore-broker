@@ -37,7 +37,7 @@ void tcp_gate::run()
     listen();
 
     std::thread([this](){
-        if (this->_cpu_core > -1 && !cpu_bind(_cpu_core))
+        if (this->_cpu_core > -1 && !cpu_core_bind(_cpu_core))
         {
             LOG_ERROR("tcp_gate bind cpu core {} fail", _cpu_core);
             return;
@@ -169,7 +169,7 @@ void tcp_gate::_async_accept(const libcpp::tcp_listener::err_t& err, libcpp::tcp
     }
 
     conn->set_recv_handler(std::bind(&tcp_gate::_on_conn_recv, this, std::placeholders::_1, std::placeholders::_2));
-    conn->set_disconnect_handler(std::bind(&tcp_gate::_on_conn_disconnect, this, std::placeholders::_1));
+    conn->set_disconn_handler(std::bind(&tcp_gate::_on_conn_disconnect, this, std::placeholders::_1));
     std::set<market_data_shm*> mds;
     _mgr.emplace(std::move(conn), std::move(mds));
 

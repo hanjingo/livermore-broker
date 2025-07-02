@@ -4,15 +4,10 @@ cmake_minimum_required(VERSION 3.19.2)
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VCPKG_ROOT})
         set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+    else()
+        message(ERROR "please provide environment value VCPKG_ROOT or CMAKE_TOOLCHAIN_FILE before build this project")
     endif()
 endif()
-
-# # cmake module path
-# if (NOT DEFINED CMAKE_MODULE_PATH)
-#     set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmakes)
-# else()
-#     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmakes)
-# endif()
 
 # Version Info
 set(LIVERMORE_BROKER_VERSION_MAJOR 0)
@@ -74,6 +69,8 @@ add_subdirectory(deps)
 
 if (DEPS_COMPLETE)
     add_subdirectory(src)
+else()
+    message(WARNING "3rd project dependents not found; please run: \"cmake -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake .. && make\" to install it, before \"cmake ..\"")
 endif()
 
 if (BUILD_TESTS)

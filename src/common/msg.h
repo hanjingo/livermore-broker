@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <atomic>
-#include <libcpp/net/proto/message.hpp>
 
 namespace common
 {
@@ -17,7 +16,7 @@ enum encoding : std::uint8_t
 };
 
 template <typename T>
-struct msg : public libcpp::message
+struct msg
 {
     msg(const uint16_t _id, const uint16_t _len, const uint16_t _seq, const uint16_t _tm, 
         const uint16_t _crc, const encoding _ec) 
@@ -29,9 +28,6 @@ struct msg : public libcpp::message
         , encode_type{_ec}
     {}
     ~msg() {}
-    virtual std::size_t size() { return len; }
-    virtual std::size_t encode(unsigned char* buf, const std::size_t len) { return len; }
-    virtual std::size_t decode(const unsigned char* buf, const std::size_t len) { return len; }
 
     uint16_t id;
     uint16_t len;

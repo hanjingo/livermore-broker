@@ -1,7 +1,9 @@
 #ifndef SCRAPER_H
 #define SCRAPER_H
 
+#include <stdint.h>
 #include <vector>
+#include <string>
 
 namespace database
 {
@@ -13,7 +15,7 @@ public:
     {}
     ~scraper()
     {}
-    void connect(const char* ip, const uint16_t port, );
+    void connect(const char* ip, const uint16_t port);
     void subscribe(std::vector<std::string>& topics);
     void unsubscribe(std::vector<std::string>& topics);
 

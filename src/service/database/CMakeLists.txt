@@ -5,9 +5,6 @@ set(CMAKE_CXX_STANDARD 11)
 project(database)
 
 set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
-set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../deps)
-set(ENV{PKG_CONFIG_PATH} "${DEPS_DIR}/lib/pkgconfig")
-set(CMAKE_PREFIX_PATH "${DEPS_DIR}/lib/cmake")
 
 if (NOT DATABASE_SHARED_NAME)
     set(DATABASE_SHARED_NAME ${PROJECT_NAME})
@@ -17,33 +14,39 @@ if (NOT DATABASE_STATIC_NAME)
     set(DATABASE_STATIC_NAME ${PROJECT_NAME}-static)
 endif()
 
-find_package(Boost COMPONENTS 
+find_package(Boost REQUIRED COMPONENTS
     filesystem
     coroutine
     program_options)
 
-find_package(PkgConfig REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
-pkg_check_modules(BREAKPAD REQUIRED breakpad-client)
-
-set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
+find_package(unofficial-breakpad REQUIRED)
+find_package(lz4 REQUIRED)
+find_package(zstd REQUIRED)
+find_package(cityhash REQUIRED)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${COMMON_SOURCE_DIR})
-include_directories(${BREAKPAD_INCLUDE_DIRS})
-include_directories(${CMAKE_SOURCE_DIR}/deps/include)
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-link_directories(${CTP_LIBRARY_DIR})
-link_directories(${BREAKPAD_LIBRARY_DIRS})
-link_directories(${CMAKE_SOURCE_DIR}/deps/lib)
+link_directories(${DEPS_DIR}/lib)
 
-aux_source_directory(./ SRC)
 aux_source_directory(${COMMON_SOURCE_DIR} COMM_SRC)
 
 if (BUILD_SHARED)
-    add_library(${DATABASE_SHARED_NAME} SHARED ${SRC} ${COMM_SRC})
+    add_library(${DATABASE_SHARED_NAME} SHARED 
+        application.h
+        application.cpp
+        cleaner.h
+        cleaner.cpp
+        config.h
+        config.cpp
+        error.h
+        export.cpp
+        scraper.h
+        scraper.cpp
+    )
 
     target_link_libraries(${DATABASE_SHARED_NAME} 
         ${CMAKE_DL_LIBS}
@@ -51,7 +54,11 @@ if (BUILD_SHARED)
         breakpad_client
         spdlog::spdlog
         pthread
-        fmt::fmt)
+        fmt::fmt
+        clickhouse-cpp-lib
+        lz4::lz4
+        zstd::libzstd
+        cityhash)
 endif()
 
 if (BUILD_STATIC)
@@ -63,7 +70,11 @@ if (BUILD_STATIC)
         breakpad_client
         spdlog::spdlog
         pthread
-        fmt::fmt)
+        fmt::fmt
+        clickhouse-cpp-lib
+        lz4::lz4
+        zstd::libzstd
+        cityhash)
 endif()
 
 message("service ${PROJECT_NAME} build success")

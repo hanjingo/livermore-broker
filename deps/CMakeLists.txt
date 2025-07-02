@@ -14,6 +14,21 @@ else()
     set(DEPS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${TRIPLET_PLATFORM}")
 endif()
 
+# for environment
+set(XTP_INCLUDE_ROOT ${DEPS_DIR}/src/xtp/bin/include)
+if (TRIPLET_PLATFORM STREQUAL "x64-linux")
+    # set(CTP_ROOT ${DEPS_DIR}/src/ctp/v3.7.3_20240910_api_traderapi_linux64_se)
+    set(XTP_LIB_ROOT ${DEPS_DIR}/src/xtp/bin/linux_glibc_2.17)
+elseif(TRIPLET_PLATFORM STREQUAL "x64-windows")
+    # set(CTP_ROOT ${DEPS_DIR}/src/ctp/3.7.3_winapi_202409101516/20240910_traderapi64_windows_se)
+    set(XTP_LIB_ROOT ${DEPS_DIR}/src/xtp/bin/win64/dll)
+elseif(TRIPLET_PLATFORM STREQUAL "x86-windows")
+    # set(CTP_ROOT ${DEPS_DIR}/src/ctp3.7.3_winapi_202409101516/20240910_traderapi_windows_se)
+    set(XTP_LIB_ROOT ${DEPS_DIR}/src/xtp/bin/win32/dll)
+else()
+    message(FATAL "Not support this system: ${TRIPLET_PLATFORM}")
+endif()
+
 set(CTP_INCLUDE_DIR ${DEPS_DIR}/include/ctp)
 set(CTP_LIB_DIR ${DEPS_DIR}/lib)
 set(XTP_INCLUDE_DIR ${DEPS_DIR}/include/xtp)
@@ -23,7 +38,7 @@ find_package(libcpp)
 # if (EXISTS ${CTP_INCLUDE_DIR} AND EXISTS ${CTP_LIB_DIR})
 #     set(CTP_FOUND true)
 # endif()
-if (EXISTS ${XTP_INCLUDE_DIR} AND EXISTS ${XTP_LIB_DIR})
+if (EXISTS ${XTP_INCLUDE_ROOT} AND EXISTS ${XTP_LIB_ROOT})
     set(XTP_FOUND true)
 endif()
 
@@ -43,20 +58,7 @@ else()
 endif()
 
 # --------------------------------- build deps ---------------------------------
-set(XTP_INCLUDE_ROOT ${DEPS_DIR}/src/xtp/bin/include)
-if (TRIPLET_PLATFORM STREQUAL "x64-linux")
-    # set(CTP_ROOT ${DEPS_DIR}/src/ctp/v3.7.3_20240910_api_traderapi_linux64_se)
-    set(XTP_LIB_ROOT ${DEPS_DIR}/src/xtp/bin/linux_glibc_2.17)
-elseif(TRIPLET_PLATFORM STREQUAL "x64-windows")
-    # set(CTP_ROOT ${DEPS_DIR}/src/ctp/3.7.3_winapi_202409101516/20240910_traderapi64_windows_se)
-    set(XTP_LIB_ROOT ${DEPS_DIR}/src/xtp/bin/win64/dll)
-elseif(TRIPLET_PLATFORM STREQUAL "x86-windows")
-    # set(CTP_ROOT ${DEPS_DIR}/src/ctp3.7.3_winapi_202409101516/20240910_traderapi_windows_se)
-    set(XTP_LIB_ROOT ${DEPS_DIR}/src/xtp/bin/win32/dll)
-else()
-    message(FATAL "Not support this system: ${TRIPLET_PLATFORM}")
-endif()
-
+# for libcpp
 if(NOT libcpp_FOUND)
     ExternalProject_Add(libcpp
         URL https://github.com/hanjingo/libcpp/archive/refs/heads/main.zip
@@ -65,6 +67,7 @@ if(NOT libcpp_FOUND)
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${DEPS_DIR})
 endif()
 
+# for CTP
 # if (NOT CTP_FOUND)
 #     set(CTP_COPY_HEADER_CMD
 #         ${CMAKE_COMMAND} -E copy ${CTP_ROOT}/ThostFtdcMdApi.h ${CTP_INCLUDE_DIR} && 
@@ -97,6 +100,7 @@ endif()
 #         )
 # endif()
 
+# for XTP
 if (NOT XTP_FOUND)
     set(XTP_COPY_HEADER_CMD ${CMAKE_COMMAND} -E copy_directory ${XTP_INCLUDE_ROOT} ${XTP_INCLUDE_DIR})
     set(XTP_COPY_DLL_CMD ${CMAKE_COMMAND} -E copy_directory ${XTP_LIB_ROOT} ${XTP_LIB_DIR})

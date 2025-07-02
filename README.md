@@ -11,7 +11,7 @@ You can use one of the following ways to fetch project dependencies before build
 ### Use Vcpkg
 
 ```sh
-cmake -DCMAKE_TOOLCHAIN_FILE=xxx_vcpkg_root_path/scripts/buildsystems/vcpkg.cmake .. #(must be absolute path)
+cmake .. -DCMAKE_TOOLCHAIN_FILE=${VCPKG_CMAKE} #(VCPKG_CMAKE must be absolute path)
 ```
 
 or

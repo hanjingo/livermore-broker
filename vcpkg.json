@@ -4,10 +4,57 @@
     "breakpad",
     "spdlog",
     "cpp-httplib",
-    "boost",
-    "pkgconf"
+    "clickhouse-cpp",
+    "zstd",
+    "concurrentqueue",
+    "boost-asio",
+    "boost-program-options",
+    "boost-filesystem"
   ],
   "overrides": [
-    { "name": "boost", "version": "1.75.0" }
+    {
+      "name": "fmt",
+      "version": "11.0.2"
+    },
+	  {
+      "name": "breakpad",
+      "version": "2024-02-16"
+    },
+    {
+      "name": "concurrentqueue",
+      "version": "1.0.4"
+    },
+	  {
+      "name": "spdlog",
+      "version": "1.15.3"
+    },
+	  {
+      "name": "cpp-httplib",
+      "version": "0.20.1"
+    },
+    {
+      "name": "clickhouse-cpp",
+      "version": "2.5.1"
+    },
+    {
+      "name": "zstd",
+      "version": "1.5.7"
+    },
+    {
+      "name": "boost-asio",
+      "version": "1.76.0"
+    },
+    {
+      "name": "boost-boost-program-options",
+      "version": "1.76.0"
+    },
+    {
+      "name": "boost-filesystem",
+      "version": "1.76.0"
+    },
+    {
+      "name": "boost-system",
+      "version": "1.76.0"
+    }
   ]
 }

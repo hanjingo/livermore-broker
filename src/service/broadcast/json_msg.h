@@ -15,12 +15,12 @@ struct json_msg : public common::msg<libcpp::json>
         : common::msg<libcpp::json>(_id, 0, 0, 0, 0, common::encode_json)
     {}
     ~json_msg() {}
-    virtual std::size_t size() override 
+    virtual std::size_t size() 
     {
         return payload.size() + 15;
     }
 
-    virtual std::size_t encode(unsigned char* buf, const std::size_t size) override
+    virtual std::size_t encode(unsigned char* buf, const std::size_t size)
     { 
         libcpp::json js;
         js["id"] = id;
@@ -40,7 +40,7 @@ struct json_msg : public common::msg<libcpp::json>
         return str.size();
     }
 
-    virtual std::size_t decode(const unsigned char* buf, const std::size_t size) override 
+    virtual std::size_t decode(const unsigned char* buf, const std::size_t size) 
     {
         libcpp::json js = libcpp::json::parse(reinterpret_cast<const char*>(buf));
         len = js["len"];

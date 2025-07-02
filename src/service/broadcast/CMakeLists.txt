@@ -24,9 +24,6 @@ add_definitions(-DEMAIL="hehehunanchina@live.com")
 add_definitions(-DUSE_DEEP_DATA=true) # Use Deep Market Data
 
 set(COMMON_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../common)
-set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../deps)
-set(ENV{PKG_CONFIG_PATH} "${DEPS_DIR}/lib/pkgconfig")
-set(CMAKE_PREFIX_PATH "${DEPS_DIR}/lib/cmake")
 
 if (NOT BROADCAST_SHARED_NAME)
     set(BROADCAST_SHARED_NAME ${PROJECT_NAME})
@@ -36,7 +33,7 @@ if (NOT BROADCAST_STATIC_NAME)
     set(BROADCAST_STATIC_NAME ${PROJECT_NAME}-static)
 endif()
 
-find_package(Boost REQUIRED 
+find_package(Boost REQUIRED COMPONENTS 
     system 
     filesystem 
     context 
@@ -44,42 +41,69 @@ find_package(Boost REQUIRED
     program_options
     coroutine)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(BREAKPAD REQUIRED breakpad-client)
-
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(TBB REQUIRED)
+find_package(unofficial-breakpad REQUIRED)
+find_package(unofficial-concurrentqueue REQUIRED)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${COMMON_SOURCE_DIR})
-include_directories(${DEPS_DIR}/include)
-include_directories(${BREAKPAD_INCLUDE_DIRS})
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 link_directories(${DEPS_DIR}/lib)
 
-aux_source_directory(./ SRC)
 aux_source_directory(${COMMON_SOURCE_DIR} COMM_SRC)
 
 if (BUILD_SHARED)
-    add_library(${BROADCAST_SHARED_NAME} SHARED ${SRC} ${COMM_SRC})
+    add_library(${BROADCAST_SHARED_NAME} SHARED ${COMM_SRC} 
+        application.h
+        application.cpp
+        config.h
+        config.cpp
+        error.h
+        export.cpp
+        json_msg.h
+        tcp_gate.h
+        tcp_gate.cpp
+        util.h
+        util.cpp
+    )
 
     target_link_libraries(${BROADCAST_SHARED_NAME} 
         ${CMAKE_DL_LIBS}
         ${Boost_LIBRARIES}
         spdlog::spdlog
-        breakpad_client
         fmt::fmt
         nlohmann_json::nlohmann_json
         TBB::tbb
         rt
-        pthread)
+        pthread
+    
+        #    breakpad_client
+        unofficial::breakpad::libbreakpad # for unofficial breakpad cmake config
+        unofficial::breakpad::libbreakpad_client # for unofficial breakpad-client cmake config
+
+        #    concurrentqueue
+        unofficial::concurrentqueue::concurrentqueue # for unofficial concurrentqueue cmake config
+    )
 endif()
 
 if (BUILD_STATIC)
-    add_library(${BROADCAST_STATIC_NAME} STATIC ${SRC} ${COMM_SRC})
+    add_library(${BROADCAST_STATIC_NAME} STATIC ${COMM_SRC} 
+        application.h
+        application.cpp
+        config.h
+        config.cpp
+        error.h
+        export.cpp
+        json_msg.h
+        tcp_gate.h
+        tcp_gate.cpp
+        util.h
+        util.cpp
+    )
 
     target_link_libraries(${BROADCAST_STATIC_NAME} 
         ${CMAKE_DL_LIBS}
@@ -90,7 +114,15 @@ if (BUILD_STATIC)
         nlohmann_json::nlohmann_json
         TBB::tbb
         rt
-        pthread)
+        pthread
+
+        #    breakpad_client
+        unofficial::breakpad::libbreakpad # for unofficial breakpad cmake config
+        unofficial::breakpad::libbreakpad_client # for unofficial breakpad-client cmake config
+
+        #    concurrentqueue
+        unofficial::concurrentqueue::concurrentqueue # for unofficial concurrentqueue cmake config
+    )
 endif()
 
 message("service ${PROJECT_NAME} build success")

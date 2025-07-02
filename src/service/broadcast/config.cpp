@@ -53,7 +53,7 @@ err_t config::check()
     if (err != error::ok)
         return err;
     for (auto core : bind_cpu_cores)
-        if (core > cpu_cores())
+        if (core > cpu_core_num())
             return error::cpu_core_num_invalid;
 
     return error::ok;
