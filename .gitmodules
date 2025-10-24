@@ -1,0 +1,4 @@
+[submodule "3rd/livermore-ctp"]
+	path = 3rd/livermore-ctp
+	url = git@github.com:hanjingo/livermore-ctp.git
+	branch = main
